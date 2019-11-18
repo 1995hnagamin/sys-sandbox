@@ -1,9 +1,23 @@
 #include <netinet/in.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <time.h>
+
+// 2019-11-18 12:34:56
+// 1234567890123456789
+size_t const DATETIME_BUFFER_LENGTH = 25;
+
+char *get_current_time() {
+	time_t now = time(NULL);
+	struct tm *tmnow = localtime(&now);
+	char *buf = malloc(DATETIME_BUFFER_LENGTH);
+	strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", tmnow);
+	return buf;
+}
 
 int
 run_server(int port) {
