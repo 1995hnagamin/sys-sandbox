@@ -28,6 +28,6 @@ run_server(int port) {
 int
 main(int argc, char* argv[]) {
 	int port;
-	int n = sscanf(argv[0], "%d", &port);
+	int n = sscanf(argv[1], "%d", &port);
 	return run_server(port);
 }
