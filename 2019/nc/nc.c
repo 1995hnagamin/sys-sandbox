@@ -26,6 +26,10 @@ run_server(int port) {
 	int connfd = accept(listenfd, (struct sockaddr *)(&servaddr), &clilen);
 
 	close(listenfd);
+
+	char const welcome_msg[] = "Hello I'm a teapot\n";
+	ssize_t written = write(connfd, welcome_msg, sizeof(welcome_msg));
+
 	close(connfd);
 	return 0;
 }
