@@ -44,6 +44,9 @@ run_server(int port) {
 
 	char const welcome_msg[] = "Hello I'm a teapot\n";
 	ssize_t written = write(connfd, welcome_msg, sizeof(welcome_msg));
+	char *cur_time = get_current_time();
+	written = write(connfd, cur_time, strlen(cur_time));
+	free(cur_time);
 
 	close(connfd);
 	return 0;
