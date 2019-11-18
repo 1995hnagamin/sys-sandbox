@@ -18,6 +18,9 @@ run_server(int port) {
 
 	bind(listenfd, (struct sockaddr *)(&servaddr), sizeof(servaddr));
 
+	int const backlog = 5;
+	listen(listenfd, backlog);
+
 	close(listenfd);
 	return 0;
 }
