@@ -11,7 +11,8 @@
 // 1234567890123456789
 size_t const DATETIME_BUFFER_LENGTH = 25;
 
-char *get_current_time() {
+char *
+get_current_time() {
 	time_t now = time(NULL);
 	struct tm *tmnow = localtime(&now);
 	char *buf = malloc(DATETIME_BUFFER_LENGTH);
