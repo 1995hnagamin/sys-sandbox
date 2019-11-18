@@ -21,7 +21,12 @@ run_server(int port) {
 	int const backlog = 5;
 	listen(listenfd, backlog);
 
+	struct sockaddr_in cliaddr;
+	socklen_t clilen = sizeof(cliaddr);
+	int connfd = accept(listenfd, (struct sockaddr *)(&servaddr), &clilen);
+
 	close(listenfd);
+	close(connfd);
 	return 0;
 }
 
