@@ -51,11 +51,6 @@ run_server(int port) {
 
 int
 main(int argc, char* argv[]) {
-	char *now = get_current_time();
-	printf("%s\n", now);
-	free(now);
-	return 0;
-
 	int port;
 	int n = sscanf(argv[1], "%d", &port);
 	return run_server(port);
