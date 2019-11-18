@@ -16,7 +16,7 @@ get_current_time() {
 	time_t now = time(NULL);
 	struct tm *tmnow = localtime(&now);
 	char *buf = malloc(DATETIME_BUFFER_LENGTH);
-	strftime(buf, DATETIME_BUFFER_LENGTH, "%Y-%m-%d %H:%M:%S", tmnow);
+	strftime(buf, DATETIME_BUFFER_LENGTH, "%Y-%m-%d %H:%M:%S\n", tmnow);
 	return buf;
 }
 
