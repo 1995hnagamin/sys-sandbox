@@ -53,7 +53,7 @@ run_server(int port) {
 		size_t const readbufsz = 10;
 		char readbuf[readbufsz];
 		read(connfd, readbuf, readbufsz);
-		printf("%s\n", readbuf);
+		printf("%s", readbuf);
 	}
 
 	close(connfd);
