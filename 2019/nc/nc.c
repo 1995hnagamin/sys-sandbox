@@ -14,7 +14,7 @@ readline_printf(int sockfd, char *buf, size_t sz) {
 	ssize_t len = 0;
 	ssize_t res;
 	while ((res = read(sockfd, buf, sz - 1)) >= 0) {
-		buf[res] = '\0'
+		buf[res] = '\0';
 		printf("%s", buf);
 		len += res;
 		if (strchr(buf, '\n')) {
