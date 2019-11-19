@@ -48,6 +48,11 @@ run_server(int port) {
 	written = write(connfd, cur_time, strlen(cur_time));
 	free(cur_time);
 
+	size_t const readbufsz = 10;
+	char readbuf[readbufsz];
+	read(connfd, readbuf, readbufsz);
+	printf("%s\n", readbuf);
+
 	close(connfd);
 	return 0;
 }
