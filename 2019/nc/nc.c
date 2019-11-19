@@ -52,7 +52,7 @@ run_server(int port) {
 	size_t const readbufsz = 10;
 	char readbuf[readbufsz];
 	ssize_t res;
-	while ((res = read(connfd, readbuf, readbufsz - 1)) >= 0) {
+	while ((res = read(connfd, readbuf, readbufsz - 1)) > 0) {
 		int const stdoutfd = 1;
 		write(stdoutfd, readbuf, res);
 	}
