@@ -8,22 +8,6 @@
 #include <unistd.h>
 #include <time.h>
 
-ssize_t
-readline_printf(int sockfd, char *buf, size_t sz) {
-	assert(sz > 0);
-	ssize_t len = 0;
-	ssize_t res;
-	while ((res = read(sockfd, buf, sz - 1)) >= 0) {
-		buf[res] = '\0';
-		printf("%s", buf);
-		len += res;
-		if (strchr(buf, '\n')) {
-			return len;
-		}
-	}
-	return res;
-}
-
 // 2019-11-18 12:34:56
 // 1234567890123456789
 size_t const DATETIME_BUFFER_LENGTH = 25;
@@ -66,13 +50,12 @@ run_server(int port) {
 	free(cur_time);
 
 	int const max_cnt = 10;
-	for (int i = 0; i < max_cnt; ++i) {
-		size_t const readbufsz = 10;
-		char readbuf[readbufsz];
-		ssize_t res = readline_printf(connfd, readbuf, readbufsz);
-		if (res < 0) {
-			break;
-		}
+	size_t const readbufsz = 10;
+	char readbuf[readbufsz];
+	ssize_t res;
+	while ((res = read(connfd, readbuf, readbufsz - 1)) >= 0) {
+		int const stdoutfd = 1;
+		write(stdoutfd, readbuf, res);
 	}
 
 	close(connfd);
