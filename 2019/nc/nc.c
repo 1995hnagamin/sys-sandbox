@@ -65,7 +65,7 @@ run_server(int port) {
 	written = write(connfd, cur_time, strlen(cur_time));
 	free(cur_time);
 
-	int const max_cnt = 100;
+	int const max_cnt = 10;
 	for (int i = 0; i < max_cnt; ++i) {
 		size_t const readbufsz = 10;
 		char readbuf[readbufsz];
