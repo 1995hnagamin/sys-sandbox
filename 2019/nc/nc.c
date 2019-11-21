@@ -56,7 +56,7 @@ run_server(int port) {
 
 	struct sockaddr_in cliaddr;
 	socklen_t clilen = sizeof(cliaddr);
-	int connfd = accept(listenfd, (struct sockaddr *)(&servaddr), &clilen);
+	int connfd = accept(listenfd, (struct sockaddr *)(&cliaddr), &clilen);
 
 	close(listenfd);
 
