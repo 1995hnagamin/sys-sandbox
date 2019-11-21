@@ -21,6 +21,23 @@ get_current_time() {
 	return buf;
 }
 
+void
+handle_connection(int connfd) {
+	char const welcome_msg[] = "Hello I'm a teapot\n";
+	ssize_t written = write(connfd, welcome_msg, sizeof(welcome_msg));
+	char *cur_time = get_current_time();
+	written = write(connfd, cur_time, strlen(cur_time));
+	free(cur_time);
+
+	size_t const readbufsz = 10;
+	char readbuf[readbufsz];
+	ssize_t res;
+	while ((res = read(connfd, readbuf, readbufsz - 1)) > 0) {
+		int const stdoutfd = 1;
+		write(stdoutfd, readbuf, res);
+	}
+}
+
 int
 run_server(int port) {
 	int listenfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -43,20 +60,7 @@ run_server(int port) {
 
 	close(listenfd);
 
-	char const welcome_msg[] = "Hello I'm a teapot\n";
-	ssize_t written = write(connfd, welcome_msg, sizeof(welcome_msg));
-	char *cur_time = get_current_time();
-	written = write(connfd, cur_time, strlen(cur_time));
-	free(cur_time);
-
-	size_t const readbufsz = 10;
-	char readbuf[readbufsz];
-	ssize_t res;
-	while ((res = read(connfd, readbuf, readbufsz - 1)) > 0) {
-		int const stdoutfd = 1;
-		write(stdoutfd, readbuf, res);
-	}
-
+	handle_connection(connfd);
 	close(connfd);
 	return 0;
 }
