@@ -13,7 +13,7 @@
 size_t const DATETIME_BUFFER_LENGTH = 25;
 
 void
-handle_connection(int connfd) {
+handle_connection(int connfd, struct sockaddr_in *cliaddr) {
 	size_t const readbufsz = 10;
 	char readbuf[readbufsz];
 	ssize_t res;
@@ -43,7 +43,7 @@ run_server(int port) {
 		struct sockaddr_in cliaddr;
 		socklen_t clilen = sizeof(cliaddr);
 		int connfd = accept(listenfd, (struct sockaddr *)(&cliaddr), &clilen);
-		handle_connection(connfd);
+		handle_connection(connfd, &cliaddr);
 		close(connfd);
 	}
 	close(listenfd);
