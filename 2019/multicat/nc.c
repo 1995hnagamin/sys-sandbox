@@ -12,23 +12,8 @@
 // 1234567890123456789
 size_t const DATETIME_BUFFER_LENGTH = 25;
 
-char *
-get_current_time() {
-	time_t now = time(NULL);
-	struct tm *tmnow = localtime(&now);
-	char *buf = malloc(DATETIME_BUFFER_LENGTH);
-	strftime(buf, DATETIME_BUFFER_LENGTH, "%Y-%m-%d %H:%M:%S\n", tmnow);
-	return buf;
-}
-
 void
 handle_connection(int connfd) {
-	char const welcome_msg[] = "Hello I'm a teapot\n";
-	ssize_t written = write(connfd, welcome_msg, sizeof(welcome_msg));
-	char *cur_time = get_current_time();
-	written = write(connfd, cur_time, strlen(cur_time));
-	free(cur_time);
-
 	size_t const readbufsz = 10;
 	char readbuf[readbufsz];
 	ssize_t res;
