@@ -13,17 +13,24 @@
 // 1234567890123456789
 size_t const DATETIME_BUFFER_LENGTH = 25;
 
+// 123.123.123.123-65535.txt
+// 1234567890123456789012345
+size_t const FILENAME_LENGTH = 30;
+
 void
 handle_connection(int connfd, struct sockaddr_in *cliaddr) {
 	printf("%s:%d\n", inet_ntoa(cliaddr->sin_addr), ntohs(cliaddr->sin_port));
 
+	char filename[FILENAME_LENGTH];
+	strcpy(filename, inet_ntoa(cliaddr->sin_addr));
+	FILE *txtout = fopen(filename, "a");
 	size_t const readbufsz = 10;
 	char readbuf[readbufsz];
 	ssize_t res;
 	while ((res = read(connfd, readbuf, readbufsz - 1)) > 0) {
-		int const stdoutfd = 1;
-		write(stdoutfd, readbuf, res);
+		fprintf(txtout, "%s", readbuf);
 	}
+	fclose(txtout);
 }
 
 int
