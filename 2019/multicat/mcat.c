@@ -9,10 +9,6 @@
 #include <unistd.h>
 #include <time.h>
 
-// 2019-11-18 12:34:56
-// 1234567890123456789
-size_t const DATETIME_BUFFER_LENGTH = 25;
-
 void
 handle_connection(int connfd, struct sockaddr_in *cliaddr) {
 	size_t const ipaddrsz = 18;
