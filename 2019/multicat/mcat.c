@@ -9,6 +9,11 @@
 #include <unistd.h>
 #include <time.h>
 
+struct mcat_conn {
+	int connfd;
+	FILE *txtout;
+};
+
 void
 handle_connection(int connfd, struct sockaddr_in *cliaddr) {
 	size_t const ipaddrsz = 18;
