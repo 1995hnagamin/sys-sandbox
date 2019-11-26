@@ -1,3 +1,4 @@
+#include <arpa/inet.h>
 #include <assert.h>
 #include <netinet/in.h>
 #include <stdio.h>
@@ -14,6 +15,8 @@ size_t const DATETIME_BUFFER_LENGTH = 25;
 
 void
 handle_connection(int connfd, struct sockaddr_in *cliaddr) {
+	printf("%s:%d\n", inet_ntoa(cliaddr->sin_addr), ntohs(cliaddr->sin_port));
+
 	size_t const readbufsz = 10;
 	char readbuf[readbufsz];
 	ssize_t res;
@@ -42,9 +45,11 @@ run_server(int port) {
 	for (;;) {
 		struct sockaddr_in cliaddr;
 		socklen_t clilen = sizeof(cliaddr);
+		printf("waiting...\n");
 		int connfd = accept(listenfd, (struct sockaddr *)(&cliaddr), &clilen);
 		handle_connection(connfd, &cliaddr);
 		close(connfd);
+		printf("closed.\n");
 	}
 	close(listenfd);
 	return 0;
