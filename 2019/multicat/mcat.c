@@ -22,7 +22,7 @@ handle_connection(int connfd, struct sockaddr_in *cliaddr) {
 	printf("%s:%d\n", inet_ntoa(cliaddr->sin_addr), ntohs(cliaddr->sin_port));
 
 	char filename[FILENAME_LENGTH];
-	strcpy(filename, inet_ntoa(cliaddr->sin_addr));
+	sprintf(filename, "%s.txt", inet_ntoa(cliaddr->sin_addr));
 	FILE *txtout = fopen(filename, "a");
 	size_t const readbufsz = 10;
 	char readbuf[readbufsz];
