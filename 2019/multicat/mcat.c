@@ -12,11 +12,11 @@
 void
 handle_connection(int connfd, struct sockaddr_in *cliaddr) {
 	size_t const ipaddrsz = 18;
-	size_t const FILENAME_LENGTH = 30; // 123.123.123.123-65535.txt
+	size_t const filename_length = 30; // 123.123.123.123-65535.txt
 
 	printf("%s:%d\n", inet_ntoa(cliaddr->sin_addr), ntohs(cliaddr->sin_port));
 
-	char ipaddr[ipaddrsz], filename[FILENAME_LENGTH];
+	char ipaddr[ipaddrsz], filename[filename_length];
 	inet_ntop(AF_INET, &(cliaddr->sin_addr), ipaddr, ipaddrsz);
 	sprintf(filename, "%s-%d.txt", ipaddr, ntohs(cliaddr->sin_port));
 
