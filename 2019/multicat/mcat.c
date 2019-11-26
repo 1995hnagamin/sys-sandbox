@@ -28,7 +28,7 @@ handle_connection(int connfd, struct sockaddr_in *cliaddr) {
 	char readbuf[readbufsz];
 	ssize_t res;
 	while ((res = read(connfd, readbuf, readbufsz - 1)) > 0) {
-		fprintf(txtout, "%s", readbuf);
+		fwrite(readbuf, sizeof(char), res, txtout);
 	}
 	fclose(txtout);
 }
