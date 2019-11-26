@@ -19,10 +19,14 @@ size_t const FILENAME_LENGTH = 30;
 
 void
 handle_connection(int connfd, struct sockaddr_in *cliaddr) {
+	size_t const ipaddrsz = 18;
+
 	printf("%s:%d\n", inet_ntoa(cliaddr->sin_addr), ntohs(cliaddr->sin_port));
 
-	char filename[FILENAME_LENGTH];
-	sprintf(filename, "%s-%d.txt", inet_ntoa(cliaddr->sin_addr), ntohs(cliaddr->sin_port));
+	char ipaddr[ipaddrsz], filename[FILENAME_LENGTH];
+	inet_ntop(AF_INET, &(cliaddr->sin_addr), ipaddr, ipaddrsz);
+	sprintf(filename, "%s-%d.txt", ipaddr, ntohs(cliaddr->sin_port));
+
 	FILE *txtout = fopen(filename, "a");
 	size_t const readbufsz = 10;
 	char readbuf[readbufsz];
