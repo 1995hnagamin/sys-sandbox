@@ -15,6 +15,23 @@ struct mcat_conn {
 	FILE *txtout;
 };
 
+void
+setup_mcat_conn(struct mcat_conn *conn, int connfd, struct sockaddr_in *cliaddr) {
+	size_t const ipaddrsz = 18;
+	size_t const filename_length = 30; // 123.123.123.123-65535.txt
+
+	printf("%s:%d\n", inet_ntoa(cliaddr->sin_addr), ntohs(cliaddr->sin_port));
+
+	char ipaddr[ipaddrsz], filename[filename_length];
+	inet_ntop(AF_INET, &(cliaddr->sin_addr), ipaddr, ipaddrsz);
+	sprintf(filename, "%s-%d.txt", ipaddr, ntohs(cliaddr->sin_port));
+
+	FILE *txtout = fopen(filename, "a");
+
+	conn->connfd = connfd;
+	conn->txtout = txtout;
+}
+
 int
 add_client_to_pollfd(struct pollfd *clients, struct mcat_conn *conns, size_t sz, int listenfd) {
 	struct sockaddr_in cliaddr;
@@ -23,6 +40,7 @@ add_client_to_pollfd(struct pollfd *clients, struct mcat_conn *conns, size_t sz,
 	int i;
 	for (i = 1; i < sz; ++i) {
 		if (clients[i].fd < 0) {
+			setup_mcat_conn(conns + i, connfd, &cliaddr);
 			clients[i].fd = connfd;
 			clients[i].events = POLLIN;
 			return i;
@@ -37,16 +55,6 @@ add_client_to_pollfd(struct pollfd *clients, struct mcat_conn *conns, size_t sz,
 
 void
 handle_connection(int connfd, struct sockaddr_in *cliaddr) {
-	size_t const ipaddrsz = 18;
-	size_t const filename_length = 30; // 123.123.123.123-65535.txt
-
-	printf("%s:%d\n", inet_ntoa(cliaddr->sin_addr), ntohs(cliaddr->sin_port));
-
-	char ipaddr[ipaddrsz], filename[filename_length];
-	inet_ntop(AF_INET, &(cliaddr->sin_addr), ipaddr, ipaddrsz);
-	sprintf(filename, "%s-%d.txt", ipaddr, ntohs(cliaddr->sin_port));
-
-	FILE *txtout = fopen(filename, "a");
 	size_t const readbufsz = 10;
 	char readbuf[readbufsz];
 	ssize_t res;
