@@ -16,7 +16,7 @@ struct mcat_conn {
 };
 
 int
-add_client_to_pollfd(struct pollfd *clients, size_t sz, int listenfd) {
+add_client_to_pollfd(struct pollfd *clients, struct mcat_conn *conns, size_t sz, int listenfd) {
 	struct sockaddr_in cliaddr;
 	socklen_t clilen = sizeof(cliaddr);
 	int connfd = accept(listenfd, (struct sockaddr *)(&cliaddr), &clilen);
