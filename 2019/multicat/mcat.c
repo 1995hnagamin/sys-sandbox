@@ -25,14 +25,14 @@ add_client_to_pollfd(struct pollfd *clients, struct mcat_conn *conns, size_t sz,
 		if (clients[i].fd < 0) {
 			clients[i].fd = connfd;
 			clients[i].events = POLLIN;
-			return 1;
+			return i;
 		}
 	}
 
 	char const msg[] = "Sorry\n";
 	write(connfd, msg, sizeof(msg));
 	close(connfd);
-	return 0;
+	return -1;
 }
 
 void
