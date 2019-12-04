@@ -81,6 +81,7 @@ run_server(int port) {
 	servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
 
 	struct pollfd clients[MAX_NUM_CLIENTS + 1];
+	struct mcat_conn conns[MAX_NUM_CLIENTS + 1];
 	clients[0].fd = listenfd;
 	clients[0].events = POLLIN;
 	for (size_t i = 1; i <= MAX_NUM_CLIENTS; ++i) {
@@ -93,13 +94,15 @@ run_server(int port) {
 	listen(listenfd, backlog);
 
 	for (;;) {
-		struct sockaddr_in cliaddr;
-		socklen_t clilen = sizeof(cliaddr);
-		printf("waiting...\n");
-		int connfd = accept(listenfd, (struct sockaddr *)(&cliaddr), &clilen);
-		handle_connection(connfd, &cliaddr);
-		close(connfd);
-		printf("closed.\n");
+		int nfds = poll(clients, MAX_NUM_CLIENTS + 1, -1);
+		if (clients[0].revents & POLLIN) {
+			add_client_to_pollfd(clients, conns, MAX_NUM_CLIENTS + 1, listenfd);
+		}
+		for (size_t i = 1; i <= MAX_NUM_CLIENTS; ++i) {
+			if (clients[i].revents & POLLIN) {
+				handle_connection(clients + i, conns + i);
+			}
+		}
 	}
 	close(listenfd);
 	return 0;
