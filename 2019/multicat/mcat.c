@@ -37,7 +37,7 @@ add_client_to_pollfd(struct pollfd *clients, struct mcat_conn *conns, size_t sz,
 	struct sockaddr_in cliaddr;
 	socklen_t clilen = sizeof(cliaddr);
 	int connfd = accept(listenfd, (struct sockaddr *)(&cliaddr), &clilen);
-	int i;
+	size_t i;
 	for (i = 1; i < sz; ++i) {
 		if (clients[i].fd < 0) {
 			setup_mcat_conn(conns + i, connfd, &cliaddr);
@@ -80,7 +80,7 @@ run_server(int port) {
 	struct pollfd clients[MAX_NUM_CLIENTS + 1];
 	clients[0].fd = listenfd;
 	clients[0].events = POLLIN;
-	for (int i = 1; i <= MAX_NUM_CLIENTS; ++i) {
+	for (size_t i = 1; i <= MAX_NUM_CLIENTS; ++i) {
 		clients[i].fd = -1, clients[i].events = 0;
 	}
 
