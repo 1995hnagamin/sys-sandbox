@@ -54,14 +54,17 @@ add_client_to_pollfd(struct pollfd *clients, struct mcat_conn *conns, size_t sz,
 }
 
 void
-handle_connection(int connfd, struct sockaddr_in *cliaddr) {
+handle_connection(struct pollfd *clients, struct mcat_conn *conn) {
 	size_t const readbufsz = 10;
 	char readbuf[readbufsz];
-	ssize_t res;
-	while ((res = read(connfd, readbuf, readbufsz - 1)) > 0) {
-		fwrite(readbuf, sizeof(char), res, txtout);
+	ssize_t const res = read(conn->connfd, readbuf, readbufsz - 1);
+	if (res <= 0) {
+		close(conn->connfd);
+		fclose(conn->txtout);
+		clients->fd = -1;
+		return;
 	}
-	fclose(txtout);
+	fwrite(readbuf, sizeof(char), res, conn->txtout);
 }
 
 size_t const MAX_NUM_CLIENTS = 10;
