@@ -41,7 +41,9 @@ handle_connection(int connfd) {
 int
 run_server(int port) {
 	int listenfd = socket(AF_INET, SOCK_STREAM, 0);
-	printf("listenfd = %d\n", listenfd);
+	char lfd_msg[100];
+	sprintf(lfd_msg, "listenfd = %d\n", listenfd);
+	write(fileno(stdout), lfd_msg, strlen(lfd_msg));
 
 	struct sockaddr_in servaddr;
 	memset(&servaddr, 0, sizeof(servaddr));
