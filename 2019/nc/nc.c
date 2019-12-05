@@ -31,8 +31,7 @@ handle_connection(int connfd) {
 	char readbuf[readbufsz];
 	ssize_t res;
 	while ((res = read(connfd, readbuf, readbufsz)) > 0) {
-		int const stdoutfd = 1;
-		write(stdoutfd, readbuf, res);
+		write(fileno(stdout), readbuf, res);
 	}
 }
 
