@@ -25,6 +25,18 @@ write_current_time(int fd) {
 	write(fd, buf, strlen(buf));
 }
 
+int
+read_and_write(int readfd, int writefd) {
+	size_t const readbufsz = 10;
+	char readbuf[readbufsz];
+	ssize_t res;
+	if ((res = read(readfd, readbuf, readbufsz)) > 0) {
+		write(writefd, readbuf, res);
+		return res;
+	}
+	return 0;
+}
+
 void
 handle_connection(int connfd) {
 	char const welcome_msg[] = "Hello I'm a teapot\n";
