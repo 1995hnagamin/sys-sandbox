@@ -8,6 +8,10 @@
 #include <unistd.h>
 #include <time.h>
 
+int max(int x, int y) {
+	return x > y ? x : y;
+}
+
 // 2019-11-18 12:34:56
 // 1234567890123456789
 size_t const DATETIME_BUFFER_LENGTH = 25;
