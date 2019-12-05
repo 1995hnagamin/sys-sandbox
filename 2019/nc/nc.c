@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
+#include <sys/select.h>
 #include <sys/socket.h>
 #include <unistd.h>
 #include <time.h>
@@ -43,11 +44,24 @@ handle_connection(int connfd) {
 	ssize_t written = write(connfd, welcome_msg, strlen(welcome_msg));
 	write_current_time(connfd);
 
-	size_t const readbufsz = 10;
-	char readbuf[readbufsz];
-	ssize_t res;
-	while ((res = read(connfd, readbuf, readbufsz)) > 0) {
-		write(fileno(stdout), readbuf, res);
+	int const maxfdp1 = 1 + max(fileno(stdout), connfd);
+
+	for (;;) {
+		fd_set rset;
+		FD_ZERO(&rset);
+		FD_SET(fileno(stdout), &rset);
+		FD_SET(connfd, &rset);
+
+		int nfds = select(maxfdp1, &rset, NULL, NULL, NULL);
+		if (FD_ISSET(fileno(stdout), &rset)) {
+			read_and_write(fileno(stdout), connfd);
+		}
+		if (FD_ISSET(connfd, &rset)) {
+			int res = read_and_write(connfd, fileno(stdout));
+			if (res == 0) {
+				return;
+			}
+		}
 	}
 }
 
