@@ -13,19 +13,6 @@ int max(int x, int y) {
 	return x > y ? x : y;
 }
 
-// 2019-11-18 12:34:56
-// 1234567890123456789
-size_t const DATETIME_BUFFER_LENGTH = 25;
-
-void
-write_current_time(int fd) {
-	time_t now = time(NULL);
-	struct tm *tmnow = localtime(&now);
-	char buf[DATETIME_BUFFER_LENGTH];
-	strftime(buf, DATETIME_BUFFER_LENGTH, "%Y-%m-%d %H:%M:%S\n", tmnow);
-	write(fd, buf, strlen(buf));
-}
-
 int
 read_and_write(int readfd, int writefd) {
 	size_t const readbufsz = 10;
@@ -40,10 +27,6 @@ read_and_write(int readfd, int writefd) {
 
 void
 handle_connection(int connfd) {
-	char const welcome_msg[] = "Hello I'm a teapot\n";
-	ssize_t written = write(connfd, welcome_msg, strlen(welcome_msg));
-	write_current_time(connfd);
-
 	int const maxfdp1 = 1 + max(fileno(stdout), connfd);
 
 	for (;;) {
