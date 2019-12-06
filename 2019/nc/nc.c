@@ -32,12 +32,12 @@ handle_connection(int connfd) {
 	for (;;) {
 		fd_set rset;
 		FD_ZERO(&rset);
-		FD_SET(fileno(stdout), &rset);
+		FD_SET(fileno(stdin), &rset);
 		FD_SET(connfd, &rset);
 
 		int nfds = select(maxfdp1, &rset, NULL, NULL, NULL);
-		if (FD_ISSET(fileno(stdout), &rset)) {
-			read_and_write(fileno(stdout), connfd);
+		if (FD_ISSET(fileno(stdin), &rset)) {
+			read_and_write(fileno(stdin), connfd);
 		}
 		if (FD_ISSET(connfd, &rset)) {
 			int res = read_and_write(connfd, fileno(stdout));
