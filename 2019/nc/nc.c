@@ -70,14 +70,12 @@ handle_connection(int connfd) {
 		for (struct sockbuf *p = sbs; p != sbs + 2; ++p) {
 			if (FD_ISSET(p->infd, &rset)) {
 				p->cur = p->begin;
-				sleep(1);
 				ssize_t res = read(p->infd, p->begin, p->cap);
 				if (res <= 0) { return; }
 				p->end = p->begin + res;
 			}
 			if (FD_ISSET(p->outfd, &wset)) {
 				size_t len = p->end - p->cur;
-				sleep(1);
 				ssize_t res = write(p->outfd, p->cur, len);
 				if (res <= 0) { return; }
 				p->cur += res;
