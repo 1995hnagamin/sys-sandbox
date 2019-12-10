@@ -68,21 +68,31 @@ setup_rwset(fd_set *rset, fd_set *wset, struct sockbuf *sbarray, size_t sz) {
 void
 handle_connection(int connfd) {
 	int const maxfdp1 = 1 + max(fileno(stdout), connfd);
+	size_t const bufsz = 10;
+	char sendbuf[bufsz], recbuf[bufsz];
+	struct sockbuf sbs[2];
+	sockbuf_init(sbs, fileno(stdin), connfd, sendbuf, bufsz);
+	sockbuf_init(sbs+1, connfd, fileno(stdout), recbuf, bufsz);
 
 	for (;;) {
-		fd_set rset;
-		FD_ZERO(&rset);
-		FD_SET(fileno(stdin), &rset);
-		FD_SET(connfd, &rset);
+		fd_set rset, wset;
+		setup_rwset(&rset, &wset, sbs, 2);
 
-		int nfds = select(maxfdp1, &rset, NULL, NULL, NULL);
-		if (FD_ISSET(fileno(stdin), &rset)) {
-			read_and_write(fileno(stdin), connfd);
-		}
-		if (FD_ISSET(connfd, &rset)) {
-			int res = read_and_write(connfd, fileno(stdout));
-			if (res == 0) {
-				return;
+		int nfds = select(maxfdp1, &rset, &wset, NULL, NULL);
+		for (struct sockbuf *p = sbs; p != sbs + 2; ++p) {
+			if (FD_ISSET(p->infd, &rset)) {
+				p->cur = p->begin;
+				sleep(1);
+				ssize_t res = read(p->infd, p->begin, p->cap);
+				if (res <= 0) { return; }
+				p->end = p->begin + res;
+			}
+			if (FD_ISSET(p->outfd, &wset)) {
+				size_t len = p->end - p->cur;
+				sleep(1);
+				ssize_t res = write(p->outfd, p->cur, len);
+				if (res <= 0) { return; }
+				p->cur += res;
 			}
 		}
 	}
