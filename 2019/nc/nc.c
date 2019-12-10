@@ -13,18 +13,6 @@ int max(int x, int y) {
 	return x > y ? x : y;
 }
 
-int
-read_and_write(int readfd, int writefd) {
-	size_t const readbufsz = 10;
-	char readbuf[readbufsz];
-	ssize_t res;
-	if ((res = read(readfd, readbuf, readbufsz)) > 0) {
-		write(writefd, readbuf, res);
-		return res;
-	}
-	return 0;
-}
-
 struct sockbuf {
 	int infd;
 	int outfd;
