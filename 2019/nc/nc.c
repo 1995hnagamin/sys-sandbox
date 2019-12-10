@@ -52,6 +52,20 @@ sockbuf_empty(struct sockbuf *sb) {
 }
 
 void
+setup_rwset(fd_set *rset, fd_set *wset, struct sockbuf *sbarray, size_t sz) {
+	FD_ZERO(rset);
+	FD_ZERO(wset);
+	struct sockbuf *const end = sbarray + sz;
+	for (struct sockbuf *p = sbarray; p != end; ++p) {
+		if (sockbuf_empty(p)) {
+			FD_SET(p->infd, rset);
+		} else {
+			FD_SET(p->outfd, wset);
+		}
+	}
+}
+
+void
 handle_connection(int connfd) {
 	int const maxfdp1 = 1 + max(fileno(stdout), connfd);
 
