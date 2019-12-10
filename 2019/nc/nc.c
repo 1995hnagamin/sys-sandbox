@@ -25,6 +25,17 @@ read_and_write(int readfd, int writefd) {
 	return 0;
 }
 
+struct sockbuf {
+	int infd;
+	int outfd;
+
+	char *begin;
+	size_t cap;
+
+	char *cur; // cur <= end
+	char *end; // end <= begin + cap
+};
+
 void
 handle_connection(int connfd) {
 	int const maxfdp1 = 1 + max(fileno(stdout), connfd);
