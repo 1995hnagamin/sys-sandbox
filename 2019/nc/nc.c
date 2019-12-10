@@ -37,6 +37,16 @@ struct sockbuf {
 };
 
 void
+sockbuf_init(struct sockbuf *p, int infd, int outfd, char *buf, size_t sz) {
+	p->infd = infd;
+	p->outfd = outfd;
+	p->begin = buf;
+	p->cap = sz;
+	p->cur = buf;
+	p->end = buf;
+}
+
+void
 handle_connection(int connfd) {
 	int const maxfdp1 = 1 + max(fileno(stdout), connfd);
 
