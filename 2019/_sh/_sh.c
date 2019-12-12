@@ -1,6 +1,10 @@
 #include "chvec.h"
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
 char **
 split_string_by_space(char *str, size_t len) {
@@ -39,14 +43,25 @@ ussh_read_line(void) {
 }
 
 void
+ussh_exec(char **slist) {
+	pid_t pid = fork();
+	assert(pid != -1);
+	if (pid != 0) {
+		int status;
+		wait(&status);
+		return;
+	}
+	execve(slist[0], slist, NULL);
+	exit(EXIT_SUCCESS);
+}
+
+void
 ussh_repl(void) {
 	for (;;) {
 		printf("$ ");
 		struct chvec *cv = ussh_read_line();
 		char **slist = split_string_by_space(chvec_ptr(cv), chvec_size(cv));
-		for (char **p = slist; *p != NULL; ++p) {
-			printf("%s\n", *p);
-		}
+		ussh_exec(slist);
 		free(slist);
 		chvec_free(cv);
 	}
