@@ -15,10 +15,18 @@ ussh_read_line(void) {
 	return cv;
 }
 
+void
+ussh_repl(void) {
+	for (;;) {
+		printf("$ ");
+		struct chvec *cv = ussh_read_line();
+		printf("%s\n", chvec_ptr(cv));
+		chvec_free(cv);
+	}
+}
+
 int
 main(int argc, char* argv[]) {
-	struct chvec *cv = ussh_read_line();
-	printf("%s\n", chvec_ptr(cv));
-	chvec_free(cv);
+	ussh_repl();
 	return 0;
 }
