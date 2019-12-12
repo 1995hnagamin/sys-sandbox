@@ -2,7 +2,9 @@
 
 TARGET = _sh
 OBJS = _sh.o \
-	chvec.o
+	gc.o \
+	chvec.o \
+	queue.o
 
 $(TARGET): $(OBJS)
 
