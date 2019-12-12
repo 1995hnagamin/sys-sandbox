@@ -1,7 +1,8 @@
 .PHONY: all clean
 
 TARGET = _sh
-OBJS = _sh.o
+OBJS = _sh.o \
+	chvec.o
 
 $(TARGET): $(OBJS)
 
