@@ -25,6 +25,8 @@ struct tr_object {
 
 void tr_free(struct tr_object *);
 
+void tr_dump(struct tr_object *);
+
 struct tr_object *tr_create_cell(struct tr_object *car, struct tr_object *cdr);
 
 struct chvec;
