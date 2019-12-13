@@ -43,6 +43,53 @@ ussh_exec(char **slist) {
 }
 
 void
+setup_pipe(struct tr_object *pair) {
+
+	size_t len1 = tr_list_length(pair->car->cdr);
+	char **slist1 = tr_list_to_sarr(pair->car->cdr, len1);
+	size_t len2 = tr_list_length(pair->cdr->cdr);
+	char **slist2 = tr_list_to_sarr(pair->cdr->cdr, len2);
+
+	int pipefd[2];
+	int ret = pipe(pipefd);
+	assert(ret != -1);
+
+	pid_t pid1 = fork();
+	assert(pid1 != -1);
+	if (pid1 == 0) {
+		dup2(pipefd[1], fileno(stdout));
+		close(pipefd[0]);
+		close(pipefd[1]);
+		for (char **p = slist1; *p != NULL; ++p) {
+			fprintf(stderr, "+ %s\n", *p);
+		}
+		execvp(slist1[0], slist1);
+		abort();
+	}
+	pid_t pid2 = fork();
+	assert(pid2 != -1);
+	if (pid2 == 0) {
+		dup2(pipefd[0], fileno(stdin));
+		close(pipefd[0]);
+		close(pipefd[1]);
+		for (char **p = slist2; *p != NULL; ++p) {
+			fprintf(stderr, "- %s\n", *p);
+		}
+		execvp(slist2[0], slist2);
+		abort();
+	}
+
+	fprintf(stderr, "I'm _sh\n");
+	close(pipefd[0]);
+	close(pipefd[1]);
+	wait(NULL);
+	wait(NULL);
+
+	free(slist1);
+	free(slist2);
+}
+
+void
 ussh_repl(void) {
 	for (;;) {
 		printf("$ ");
@@ -56,6 +103,7 @@ ussh_repl(void) {
 		fprintf(stderr, "* ");
 		tr_dump(list);
 
+		setup_pipe(list);
 		tr_free(list);
 		chvec_free(cv);
 		continue;
