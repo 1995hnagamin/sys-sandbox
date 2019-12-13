@@ -44,6 +44,7 @@ parse_str_list(char **str) {
 
 struct tr_object *
 parse(char *str) {
+	while (isspace(*str)) { ++str; }
 	struct tr_object *list = parse_str_list(&str);
 	return list;
 }
