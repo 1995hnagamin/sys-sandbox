@@ -38,6 +38,15 @@ chvec_create(size_t cap) {
 	return cv;
 }
 
+struct chvec *
+chvec_clone(struct chvec *cv) {
+	struct chvec *clone = chvec_create(cv->cap);
+	size_t sz = chvec_size(cv);
+	strncpy(clone->begin, cv->begin, sz);
+	cv->end += sz;
+	return clone;
+}
+
 void
 chvec_free(struct chvec *cv) {
 	free(cv->begin);
