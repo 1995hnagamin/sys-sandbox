@@ -1,5 +1,6 @@
 #include "cell.h"
 #include "chvec.h"
+#include "parse.h"
 #include <ctype.h>
 
 static int
