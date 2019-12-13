@@ -67,6 +67,8 @@ ussh_repl(void) {
 
 int
 main(int argc, char* argv[]) {
+	(void)argc;
+	(void)argv;
 	ussh_repl();
 	return 0;
 }
