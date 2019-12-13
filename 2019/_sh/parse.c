@@ -2,6 +2,7 @@
 #include "chvec.h"
 #include "parse.h"
 #include <ctype.h>
+#include <stdio.h>
 
 static int
 is_idchar(char c) {
@@ -31,6 +32,7 @@ parse_str_list(char **str) {
 
 	struct tr_object *tail = list;
 	while (is_idchar(*p)) {
+		fprintf(stderr, "parse_str_list: %s#\n", p);
 		struct chvec *str = parse_string(&p);
 		tail->cell.cdr = tr_create_cell(tr_create_str(str), NULL);
 		while (isspace(*p)) { ++p; }

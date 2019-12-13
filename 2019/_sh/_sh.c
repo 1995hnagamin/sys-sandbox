@@ -28,6 +28,9 @@ ussh_read_line(void) {
 
 void
 ussh_exec(char **slist) {
+	for (char **p = slist; *p != NULL; ++p) {
+		fprintf(stderr, "+ %s\n", *p);
+	}
 	pid_t pid = fork();
 	assert(pid != -1);
 	if (pid != 0) {
@@ -50,6 +53,8 @@ ussh_repl(void) {
 		}
 
 		struct tr_object *list = parse(chvec_ptr(cv));
+		fprintf(stderr, "* ");
+		tr_dump(list);
 		size_t len = tr_list_length(list);
 		char **slist = (char **)malloc(sizeof(char *) * (len + 1));
 		slist[len] = NULL;
