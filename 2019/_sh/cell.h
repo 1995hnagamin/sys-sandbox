@@ -39,4 +39,6 @@ struct tr_object *tr_clone(struct tr_object *);
 /* list operation */
 size_t tr_list_length(struct tr_object *);
 
+char **tr_list_to_sarr(struct tr_object *, size_t len);
+
 #endif /* !CELL_H */

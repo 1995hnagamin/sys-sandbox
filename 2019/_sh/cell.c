@@ -86,6 +86,17 @@ tr_list_length(tr_object_t *list) {
 	return sz;
 }
 
+char **
+tr_list_to_sarr(tr_object_t *list, size_t len) {
+	char **sarr = (char **)malloc(sizeof(char *) * (len + 1));
+	sarr[len] = NULL;
+	tr_object_t *cell = list;
+	for (size_t i = 0; i < len; ++i, cell = cell->cdr) {
+		sarr[i] = chvec_ptr(cell->car->cv);
+	}
+	return sarr;
+}
+
 static void
 tr_dump_helper(FILE *stream, tr_object_t *p) {
 	if (!p) {
