@@ -60,13 +60,13 @@ chvec_extend(struct chvec *cv, size_t newcap) {
 	}
 	char *const buf = (char *)malloc(newcap);
 	assert(buf);
-	size_t const len = chvec_size(cv);
-	strncpy(buf, cv->begin, len);
+	size_t const sz = chvec_size(cv);
+	strncpy(buf, cv->begin, sz);
 	free(cv->begin);
 
 	cv->begin = buf;
 	cv->cap = newcap;
-	cv->end = buf + len;
+	cv->end = buf + sz;
 }
 
 void
