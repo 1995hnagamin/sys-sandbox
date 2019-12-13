@@ -26,7 +26,7 @@ chvec_full(struct chvec *cv) {
 
 struct chvec *
 chvec_create(size_t cap) {
-	struct chvec *cv = (struct chvec *)malloc(sizeof(struct chvec *));
+	struct chvec *cv = (struct chvec *)malloc(sizeof(struct chvec));
 	if (!cv) {
 		return NULL;
 	}
