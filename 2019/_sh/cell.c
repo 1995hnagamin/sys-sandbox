@@ -3,20 +3,7 @@
 #include <assert.h>
 #include <stdlib.h>
 
-typedef struct tr_cell {
-	struct tr_object *car;
-	struct tr_object *cdr;
-} tr_cell_t;
-
-typedef struct tr_object {
-	enum tr_type type;
-	union {
-		tr_cell_t cell;
-		struct chvec *cv;
-		int i;
-	};
-} tr_object_t;
-
+typedef struct tr_object tr_object_t;
 
 void
 tr_free(tr_object_t *p) {
@@ -64,14 +51,6 @@ tr_create_int(int i) {
 	return p;
 }
 
-enum tr_type
-tr_get_type(tr_object_t *p) {
-	if (!p) {
-		return tr_tinvalid;
-	}
-	return p->type;
-}
-
 tr_object_t *
 tr_clone(tr_object_t *p) {
 	if (!p) {
@@ -94,28 +73,4 @@ tr_clone(tr_object_t *p) {
 			return tr_create_str(cv);
 		}
 	}
-}
-
-int
-tr_get_int(tr_object_t *p) {
-	assert(p->type == tr_tint);
-	return p->i;
-}
-
-struct chvec *
-tr_get_chvec(tr_object_t *p) {
-	assert(p->type == tr_tstr);
-	return p->cv;
-}
-
-struct tr_object *
-tr_get_car(tr_object_t *p) {
-	assert(p->type == tr_tcell);
-	return p->cell.car;
-}
-
-struct tr_object *
-tr_get_cdr(tr_object_t *p) {
-	assert(p->type == tr_tcell);
-	return p->cell.cdr;
 }
