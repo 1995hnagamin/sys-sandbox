@@ -55,6 +55,11 @@ ussh_repl(void) {
 		struct tr_object *list = parse(chvec_ptr(cv));
 		fprintf(stderr, "* ");
 		tr_dump(list);
+
+		tr_free(list);
+		chvec_free(cv);
+		continue;
+
 		size_t len = tr_list_length(list);
 		char **slist = (char **)malloc(sizeof(char *) * (len + 1));
 		slist[len] = NULL;
