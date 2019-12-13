@@ -1,32 +1,12 @@
+#include "cell.h"
 #include "chvec.h"
+#include "parse.h"
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
-
-char **
-split_string_by_space(char *str, size_t len) {
-	size_t cnt = 0;
-	for (char *p = str, *end = str + len; p != end; ++p) {
-		if (*p == ' ') { ++cnt; }
-	}
-	char **slist = malloc(sizeof(char *) * (cnt+2));
-	*slist = str;
-	*(slist+cnt+1) = NULL;
-	char **cur = slist + 1;
-	for (char *p = str, *end = str + len; p != end; ++p) {
-		if (*p == ' ') {
-			*cur = ++p;
-			++cur;
-		}
-	}
-	for (char **p = slist + 1; *p != NULL; ++p) {
-		*(*p - 1) = '\0';
-	}
-	return slist;
-}
 
 struct chvec *
 ussh_read_line(void) {
@@ -68,9 +48,19 @@ ussh_repl(void) {
 			printf("\n");
 			return;
 		}
-		char **slist = split_string_by_space(chvec_ptr(cv), chvec_size(cv));
+
+		struct tr_object *list = parse(chvec_ptr(cv));
+		size_t len = tr_list_length(list);
+		char **slist = (char **)malloc(sizeof(char *) * (len + 1));
+		slist[len] = NULL;
+		struct tr_object *p = list;
+		for (size_t i = 0; i < len; ++i, p = p->cell.cdr) {
+			slist[i] = chvec_ptr(p->cell.car->cv);
+		}
+
 		ussh_exec(slist);
 		free(slist);
+		tr_free(list);
 		chvec_free(cv);
 	}
 }
