@@ -1,6 +1,8 @@
 #ifndef CELL_H
 #define CELL_H
 
+#include <stddef.h>
+
 enum tr_type {
 	tr_tinvalid,
 	tr_tcell,
@@ -35,5 +37,8 @@ struct tr_object *tr_create_str(struct chvec *);
 struct tr_object *tr_create_int(int);
 
 struct tr_object *tr_clone(struct tr_object *);
+
+/* list operation */
+size_t tr_list_length(struct tr_object *);
 
 #endif /* !CELL_H */

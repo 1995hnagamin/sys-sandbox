@@ -76,6 +76,16 @@ tr_clone(tr_object_t *p) {
 	}
 }
 
+size_t
+tr_list_length(tr_object_t *list) {
+	size_t sz = 0;
+	while (list) {
+		++sz;
+		list = list->cell.cdr;
+	}
+	return sz;
+}
+
 static void
 tr_dump_helper(FILE *stream, tr_object_t *p) {
 	if (!p) {
