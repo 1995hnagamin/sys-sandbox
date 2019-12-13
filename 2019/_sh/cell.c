@@ -17,8 +17,8 @@ tr_free(tr_object_t *p) {
 		case tr_tint:
 			break;
 		case tr_tcell:
-			tr_free(p->cell.car);
-			tr_free(p->cell.cdr);
+			tr_free(p->car);
+			tr_free(p->cdr);
 			break;
 		case tr_tstr:
 			chvec_free(p->cv);
@@ -31,8 +31,8 @@ tr_object_t *
 tr_create_cell(tr_object_t *car, tr_object_t *cdr) {
 	tr_object_t *p = (tr_object_t *)malloc(sizeof(tr_object_t));
 	p->type = tr_tcell;
-	p->cell.car = car;
-	p->cell.cdr = cdr;
+	p->car = car;
+	p->cdr = cdr;
 	return p;
 }
 
@@ -64,8 +64,8 @@ tr_clone(tr_object_t *p) {
 			return tr_create_int(p->i);
 		case tr_tcell:
 		{
-			tr_object_t *car = tr_clone(p->cell.car);
-			tr_object_t *cdr = tr_clone(p->cell.cdr);
+			tr_object_t *car = tr_clone(p->car);
+			tr_object_t *cdr = tr_clone(p->cdr);
 			return tr_create_cell(car, cdr);
 		}
 		case tr_tstr:
@@ -81,7 +81,7 @@ tr_list_length(tr_object_t *list) {
 	size_t sz = 0;
 	while (list) {
 		++sz;
-		list = list->cell.cdr;
+		list = list->cdr;
 	}
 	return sz;
 }
@@ -103,9 +103,9 @@ tr_dump_helper(FILE *stream, tr_object_t *p) {
 			break;
 		case tr_tcell:
 			fprintf(stream, "(");
-			tr_dump_helper(stream, p->cell.car);
+			tr_dump_helper(stream, p->car);
 			fprintf(stream, " . ");
-			tr_dump_helper(stream, p->cell.cdr);
+			tr_dump_helper(stream, p->cdr);
 			fprintf(stream, ")");
 			break;
 	}

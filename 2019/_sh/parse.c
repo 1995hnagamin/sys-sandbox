@@ -34,9 +34,9 @@ parse_str_list(char **str) {
 	while (is_idchar(*p)) {
 		fprintf(stderr, "parse_str_list: %s#\n", p);
 		struct chvec *str = parse_string(&p);
-		tail->cell.cdr = tr_create_cell(tr_create_str(str), NULL);
+		tail->cdr = tr_create_cell(tr_create_str(str), NULL);
 		while (isspace(*p)) { ++p; }
-		tail = tail->cell.cdr;
+		tail = tail->cdr;
 	}
 	*str = p;
 	return list;

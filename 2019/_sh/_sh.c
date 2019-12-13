@@ -59,8 +59,8 @@ ussh_repl(void) {
 		char **slist = (char **)malloc(sizeof(char *) * (len + 1));
 		slist[len] = NULL;
 		struct tr_object *p = list;
-		for (size_t i = 0; i < len; ++i, p = p->cell.cdr) {
-			slist[i] = chvec_ptr(p->cell.car->cv);
+		for (size_t i = 0; i < len; ++i, p = p->cdr) {
+			slist[i] = chvec_ptr(p->car->cv);
 		}
 
 		ussh_exec(slist);

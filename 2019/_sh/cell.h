@@ -10,15 +10,13 @@ enum tr_type {
 	tr_tint,
 };
 
-struct tr_cell {
-	struct tr_object *car;
-	struct tr_object *cdr;
-};
-
 struct tr_object {
 	enum tr_type type;
 	union {
-		struct tr_cell cell;
+		struct {
+			struct tr_object *car;
+			struct tr_object *cdr;
+		};
 		struct chvec *cv;
 		int i;
 	};
