@@ -2,6 +2,7 @@
 
 TARGET = _sh
 OBJS = _sh.o \
+	cell.o \
 	chvec.o
 
 $(TARGET): $(OBJS)
