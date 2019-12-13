@@ -51,7 +51,7 @@ ussh_exec(char **slist) {
 		wait(&status);
 		return;
 	}
-	execve(slist[0], slist, NULL);
+	execvp(slist[0], slist);
 	exit(EXIT_SUCCESS);
 }
 
