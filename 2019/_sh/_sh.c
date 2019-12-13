@@ -33,7 +33,11 @@ ussh_read_line(void) {
 	struct chvec *cv = chvec_create(10);
 	for (;;) {
 		char c = getchar();
-		if (c == EOF || c == '\n') {
+		if (c == EOF) {
+			chvec_free(cv);
+			return NULL;
+		}
+		if (c == '\n') {
 			chvec_push_back(cv, '\0');
 			break;
 		}
@@ -60,6 +64,10 @@ ussh_repl(void) {
 	for (;;) {
 		printf("$ ");
 		struct chvec *cv = ussh_read_line();
+		if (!cv) {
+			printf("\n");
+			return;
+		}
 		char **slist = split_string_by_space(chvec_ptr(cv), chvec_size(cv));
 		ussh_exec(slist);
 		free(slist);
