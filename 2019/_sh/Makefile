@@ -6,6 +6,8 @@ OBJS = _sh.o \
 
 $(TARGET): $(OBJS)
 
+CC = clang
+
 CFLAGS = -std=c11 \
 	-Wall -Wextra -Wpedantic
 
