@@ -20,7 +20,27 @@ parse_string(char **str) {
 	return cv;
 }
 
-struct tr_cell *
-parse_command(char **str) {
+struct tr_object *
+parse_str_list(char **str) {
+	char *p = *str;
 
+	struct chvec *head = parse_string(&p);
+	while (isspace(*p)) { ++p; }
+	struct tr_object *list = tr_create_cell(tr_create_str(head), NULL);
+
+	struct tr_object *tail = list;
+	while (is_idchar(*p)) {
+		struct chvec *str = parse_string(&p);
+		tail->cell.cdr = tr_create_cell(tr_create_str(str), NULL);
+		while (isspace(*p)) { ++p; }
+		tail = tail->cell.cdr;
+	}
+	*str = p;
+	return list;
+}
+
+struct tr_object *
+parse(char *str) {
+	struct tr_object *list = parse_str_list(&str);
+	return list;
 }
