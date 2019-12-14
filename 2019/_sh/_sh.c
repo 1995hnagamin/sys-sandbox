@@ -8,6 +8,12 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+void
+close_pipes(int pipefd[2]) {
+	close(pipefd[0]);
+	close(pipefd[1]);
+}
+
 struct chvec *
 ussh_read_line(void) {
 	struct chvec *cv = chvec_create(10);
