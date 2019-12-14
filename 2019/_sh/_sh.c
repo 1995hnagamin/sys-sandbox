@@ -83,43 +83,50 @@ ussh_exec(char **slist) {
 }
 
 void
-setup_pipe(char ***cmds, size_t ncmds) {
+setup_pipe(struct tr_object *pair) {
+
+	size_t len1 = tr_list_length(pair->car->cdr);
+	char **slist1 = tr_list_to_sarr(pair->car->cdr, len1);
+	size_t len2 = tr_list_length(pair->cdr->cdr);
+	char **slist2 = tr_list_to_sarr(pair->cdr->cdr, len2);
+
 	int pipefd[2];
 	int ret = pipe(pipefd);
 	assert(ret != -1);
 
 	pid_t pid1 = fork();
 	assert(pid1 != -1);
-	if (pid1 != 0) {
-		/* parent */
-		close_pipes(pipefd);
-		for (size_t i = 0; i < ncmds; ++i) {
-			wait(NULL);
+	if (pid1 == 0) {
+		dup2(pipefd[1], fileno(stdout));
+		close(pipefd[0]);
+		close(pipefd[1]);
+		for (char **p = slist1; *p != NULL; ++p) {
+			fprintf(stderr, "+ %s\n", *p);
 		}
-		return;
+		execvp(slist1[0], slist1);
+		abort();
+	}
+	pid_t pid2 = fork();
+	assert(pid2 != -1);
+	if (pid2 == 0) {
+		dup2(pipefd[0], fileno(stdin));
+		close(pipefd[0]);
+		close(pipefd[1]);
+		for (char **p = slist2; *p != NULL; ++p) {
+			fprintf(stderr, "- %s\n", *p);
+		}
+		execvp(slist2[0], slist2);
+		abort();
 	}
 
-	setpgid(0, 0);
-	char ***cmd = cmds;
-	for (size_t i = 1; i < ncmds; ++i, ++cmd) {
-		int pipefd[2];
-		int ret = pipe(pipefd);
-		assert(ret != -1);
-		pid_t pid = fork();
-		assert(pid != -1);
-		if (pid != 0) {
-			/* front */
-			dup2(pipefd[1], fileno(stdout));
-			close_pipes(pipefd);
-			execvp((*cmd)[0], *cmd);
-			abort();
-		}
-		/* back */
-		dup2(pipefd[0], fileno(stdin));
-		close_pipes(pipefd);
-	}
-	execvp((*cmd)[0], *cmd);
-	abort();
+	fprintf(stderr, "I'm _sh\n");
+	close(pipefd[0]);
+	close(pipefd[1]);
+	wait(NULL);
+	wait(NULL);
+
+	free(slist1);
+	free(slist2);
 }
 
 void
@@ -136,10 +143,21 @@ ussh_repl(void) {
 		fprintf(stderr, "* ");
 		tr_dump(list);
 
-		size_t len = count_ncmds(list);
-		char ***cmds = get_command_arr(list, len);
-		setup_pipe(cmds, len);
-		free_command_arr(cmds);
+		setup_pipe(list);
+		tr_free(list);
+		chvec_free(cv);
+		continue;
+
+		size_t len = tr_list_length(list);
+		char **slist = (char **)malloc(sizeof(char *) * (len + 1));
+		slist[len] = NULL;
+		struct tr_object *p = list;
+		for (size_t i = 0; i < len; ++i, p = p->cdr) {
+			slist[i] = chvec_ptr(p->car->cv);
+		}
+
+		ussh_exec(slist);
+		free(slist);
 		tr_free(list);
 		chvec_free(cv);
 	}
