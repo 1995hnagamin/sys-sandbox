@@ -8,6 +8,40 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+size_t
+count_ncmds(struct tr_object *p) {
+	size_t cnt;
+	for (cnt = 0; p != NULL; ++cnt, p = p->cdr->cdr) {
+		struct tr_object *head = p->cdr->car->cdr->car;
+		if (chvec_size(head->cv) == 0) {
+			break;
+		}
+	}
+	return cnt;
+}
+
+char ***
+get_command_arr(struct tr_object *tree, size_t ncmds) {
+	size_t sz = ncmds + 1;
+	char ***cmds = (char ***)malloc(sizeof(char **) * sz);
+	cmds[sz - 1] = NULL;
+	struct tr_object *p = tree;
+	for (int i = 0; p != NULL; ++i, p = p->cdr->cdr) {
+		struct tr_object *list = p->cdr->car->cdr;
+		size_t len = tr_list_length(list);
+		cmds[i] = tr_list_to_sarr(list, len);
+	}
+	return cmds;
+}
+
+void
+free_command_arr(char ***cmds) {
+	for (char ***p = cmds; *p != NULL; ++p) {
+		free(*p);
+	}
+	free(cmds);
+}
+
 void
 close_pipes(int pipefd[2]) {
 	close(pipefd[0]);
