@@ -71,22 +71,8 @@ parse_piped_cmds(char **str) {
 }
 
 struct tr_object *
-pipe_pair(char **str) {
-	char *p = *str;
-	struct tr_object *cmd1 = parse_str_list(&p);
-	while (isspace(*p)) { ++p; }
-	assert(*p == '|'); ++p;
-	while (isspace(*p)) { ++p; }
-	struct tr_object *cmd2 = parse_str_list(&p);
-	struct tr_object *pair = tr_create_cell(cmd1, cmd2);
-
-	*str = p;
-	return pair;
-}
-
-struct tr_object *
 parse(char *str) {
 	while (isspace(*str)) { ++str; }
-	struct tr_object *list = pipe_pair(&str);
+	struct tr_object *list = parse_piped_cmds(&str);
 	return list;
 }
