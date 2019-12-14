@@ -127,7 +127,7 @@ ussh_repl(void) {
 		printf("$ ");
 		struct chvec *cv = ussh_read_line();
 		if (!cv) {
-			printf("\n");
+			printf("exit\n");
 			return;
 		}
 
