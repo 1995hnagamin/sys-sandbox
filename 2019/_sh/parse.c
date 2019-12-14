@@ -51,7 +51,9 @@ parse_piped_cmds(char **str) {
 
 	struct tr_object *cmd1 = parse_str_list(&p);
 	while (isspace(*p)) { ++p; }
-	struct tr_object *pipe = tr_create_cell(tr_create_int(ussh_sypipe), tr_create_cell(cmd1, NULL));
+	struct tr_object *pipe = tr_create_cell(
+			tr_create_int(ussh_sypipe),
+			tr_create_cell(cmd1, NULL));
 
 	struct tr_object *tail = pipe->cdr;
 	while (*p == '|') {
@@ -62,7 +64,9 @@ parse_piped_cmds(char **str) {
 		struct tr_object *cmd = parse_str_list(&p);
 		fprintf(stderr, "parse_piped_cmds: %s#\n", p);
 		while (isspace(*p)) { ++p; }
-		tail->cdr = tr_create_cell(tr_create_int(ussh_sypipe), tr_create_cell(cmd, NULL));
+		tail->cdr = tr_create_cell(
+				tr_create_int(ussh_sypipe),
+				tr_create_cell(cmd, NULL));
 		tail = tail->cdr->cdr;
 	}
 
