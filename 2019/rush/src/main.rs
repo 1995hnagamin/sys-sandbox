@@ -9,6 +9,25 @@ enum Goal {
     Finished,
 }
 
+fn main() {
+    rush_repl();
+}
+
+fn rush_repl() {
+    use Goal::*;
+    loop {
+        match rush_read_eval_print() {
+            Ok(Nop) => (),
+            Ok(Finished) => (),
+            Ok(Eos) => {
+                println!("exit");
+                std::process::exit(0);
+            }
+            Err(err) => println!("rush: {}", err.to_string()),
+        }
+    }
+}
+
 fn rush_read_eval_print() -> Result<Goal, Box<Error>> {
     use std::io::{stdin, stdout, Write};
     use Goal::*;
@@ -45,23 +64,4 @@ fn rush_read_eval_print() -> Result<Goal, Box<Error>> {
         }
     };
     Ok(Finished)
-}
-
-fn rush_repl() {
-    use Goal::*;
-    loop {
-        match rush_read_eval_print() {
-            Ok(Nop) => (),
-            Ok(Finished) => (),
-            Ok(Eos) => {
-                println!("exit");
-                std::process::exit(0);
-            }
-            Err(err) => println!("rush: {}", err.to_string()),
-        }
-    }
-}
-
-fn main() {
-    rush_repl();
 }
