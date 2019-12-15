@@ -11,7 +11,7 @@ enum Goal {
 
 fn rush_read_eval_print() -> Result<Goal, Box<Error>> {
     use std::io::{stdin, stdout, Write};
-    use Goal::{Eos, Finished, Nop};
+    use Goal::*;
     print!("$ ");
     stdout().flush()?;
 
@@ -48,7 +48,7 @@ fn rush_read_eval_print() -> Result<Goal, Box<Error>> {
 }
 
 fn rush_repl() {
-    use Goal::{Eos, Finished, Nop};
+    use Goal::*;
     loop {
         match rush_read_eval_print() {
             Ok(Nop) => (),
