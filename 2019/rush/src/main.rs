@@ -21,7 +21,7 @@ fn rush_repl() {
             Ok(Finished(stat)) => println!("status: {}", stat),
             Ok(Eos) => {
                 println!("exit");
-                std::process::exit(0);
+                std::process::exit(0)
             }
             Err(err) => println!("rush: {}", err.to_string()),
         }
