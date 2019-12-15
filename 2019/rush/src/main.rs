@@ -6,7 +6,7 @@ mod parse;
 enum Goal {
     Eos, // end of session
     Nop,
-    Finished,
+    Finished(i32),
 }
 
 fn main() {
@@ -18,7 +18,7 @@ fn rush_repl() {
     loop {
         match rush_read_eval_print() {
             Ok(Nop) => (),
-            Ok(Finished) => (),
+            Ok(Finished(stat)) => println!("status: {}", stat),
             Ok(Eos) => {
                 println!("exit");
                 std::process::exit(0);
@@ -57,11 +57,17 @@ fn rush_read_eval_print() -> Result<Goal, Box<Error>> {
             let cmd: Vec<_> = cmd.iter().map(|word| word.as_c_str()).collect();
             let err = unistd::execvp(cmd[0], &cmd).unwrap_err();
             println!("rush: {}", err.to_string());
-            std::process::exit(1);
+            std::process::exit(1)
         }
-        ForkResult::Parent { child: _ } => {
-            nix::sys::wait::wait()?;
-        }
-    };
-    Ok(Finished)
+        ForkResult::Parent { child: _ } => wait_for_children(),
+    }
+}
+
+fn wait_for_children() -> Result<Goal, Box<Error>> {
+    use nix::sys::wait;
+    use wait::WaitStatus::*;
+    match wait::wait()? {
+        Exited(_, stat) => Ok(Goal::Finished(stat)),
+        _ => panic!("unimplemented"),
+    }
 }
