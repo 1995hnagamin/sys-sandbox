@@ -2,16 +2,22 @@ use std::error::Error;
 use std::ffi::CString;
 mod parse;
 
-fn rush_read_eval_print() -> Result<(), Box<Error>> {
+enum Goal {
+    Eos, // end of session
+    Nop,
+    Finished,
+}
+
+fn rush_read_eval_print() -> Result<Goal, Box<Error>> {
     use nix::unistd::ForkResult;
     use std::io::{stdin, stdout, Write};
+    use Goal::{Eos, Finished, Nop};
     print!("$ ");
     stdout().flush()?;
 
     let mut line = String::new();
     if stdin().read_line(&mut line)? == 0 {
-        println!("exit");
-        std::process::exit(0);
+        return Ok(Eos);
     }
     line.pop();
     let cmd = parse::parse(&line).and_then(|words| {
@@ -23,7 +29,7 @@ fn rush_read_eval_print() -> Result<(), Box<Error>> {
             .map_err(|err| err.to_string())
     })?;
     if cmd.len() < 1 {
-        return Ok(());
+        return Ok(Nop);
     }
 
     match nix::unistd::fork()? {
@@ -35,13 +41,19 @@ fn rush_read_eval_print() -> Result<(), Box<Error>> {
             nix::sys::wait::wait()?;
         }
     };
-    Ok(())
+    Ok(Finished)
 }
 
 fn rush_repl() {
+    use Goal::{Eos, Finished, Nop};
     loop {
         match rush_read_eval_print() {
-            Ok(()) => (),
+            Ok(Nop) => (),
+            Ok(Finished) => (),
+            Ok(Eos) => {
+                println!("exit");
+                std::process::exit(0);
+            }
             Err(err) => println!("rush: {}", err.to_string()),
         }
     }
