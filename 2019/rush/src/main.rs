@@ -1,3 +1,4 @@
+use nix::unistd;
 use std::error::Error;
 use std::ffi::CString;
 mod parse;
@@ -9,7 +10,6 @@ enum Goal {
 }
 
 fn rush_read_eval_print() -> Result<Goal, Box<Error>> {
-    use nix::unistd::ForkResult;
     use std::io::{stdin, stdout, Write};
     use Goal::{Eos, Finished, Nop};
     print!("$ ");
@@ -32,10 +32,11 @@ fn rush_read_eval_print() -> Result<Goal, Box<Error>> {
         return Ok(Nop);
     }
 
-    match nix::unistd::fork()? {
+    use unistd::ForkResult;
+    match unistd::fork()? {
         ForkResult::Child => {
             let cmd: Vec<_> = cmd.iter().map(|word| word.as_c_str()).collect();
-            let err = nix::unistd::execvp(cmd[0], &cmd).unwrap_err();
+            let err = unistd::execvp(cmd[0], &cmd).unwrap_err();
             println!("rush: {}", err.to_string());
             std::process::exit(1);
         }
