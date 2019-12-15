@@ -35,7 +35,9 @@ fn rush_read_eval_print() -> Result<Goal, Box<Error>> {
     match nix::unistd::fork()? {
         ForkResult::Child => {
             let cmd: Vec<_> = cmd.iter().map(|word| word.as_c_str()).collect();
-            nix::unistd::execvp(cmd[0], &cmd)?;
+            let err = nix::unistd::execvp(cmd[0], &cmd).unwrap_err();
+            println!("rush: {}", err.to_string());
+            std::process::exit(1);
         }
         ForkResult::Parent { child: _ } => {
             nix::sys::wait::wait()?;
