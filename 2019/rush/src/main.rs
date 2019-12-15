@@ -28,7 +28,7 @@ fn rush_read_eval_print() -> Result<Goal, Box<Error>> {
             .collect::<Result<Vec<_>, _>>()
             .map_err(|err| err.to_string())
     })?;
-    if cmd.len() < 1 {
+    if cmd.len() == 0 {
         return Ok(Nop);
     }
 
