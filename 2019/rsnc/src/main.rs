@@ -60,6 +60,27 @@ impl SockBuf {
     fn empty(&self) -> bool {
         self.cur == self.end
     }
+    fn read(&mut self) -> nix::Result<usize> {
+        self.cur = 0;
+        let result = unistd::read(self.infd, &mut self.buf);
+        match result {
+            Ok(size) => {
+                self.end = size;
+                result
+            }
+            Err(_) => result,
+        }
+    }
+    fn write(&mut self) -> nix::Result<usize> {
+        let result = unistd::write(self.outfd, &self.buf[0..self.end]);
+        match result {
+            Ok(size) => {
+                self.cur += size;
+                result
+            }
+            Err(_) => result,
+        }
+    }
 }
 
 fn make_rwset(sockbufs: &[SockBuf]) -> (FdSet, FdSet) {
@@ -88,19 +109,14 @@ fn handle_connection(connfd: RawFd) -> Result<(), Box<Error>> {
         let _nfds = select(maxfdp1, &mut rset, &mut wset, None, None);
         for p in sbs.iter_mut() {
             if rset.contains(p.infd) {
-                p.cur = 0;
-                let size = unistd::read(p.infd, &mut p.buf)?;
-                if size == 0 {
+                if p.read()? == 0 {
                     return Ok(());
                 }
-                p.end = size;
             }
             if wset.contains(p.outfd) {
-                let size = unistd::write(p.outfd, &p.buf[0..p.end])?;
-                if size == 0 {
+                if p.write()? == 0 {
                     return Ok(());
                 }
-                p.cur += size;
             }
         }
     }
