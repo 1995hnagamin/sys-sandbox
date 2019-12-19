@@ -2,6 +2,7 @@
 #include "chvec.h"
 #include "parse.h"
 #include <assert.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -93,6 +94,7 @@ setup_pipe(char ***cmds, size_t ncmds) {
 		assert(pid != -1);
 		if (pid == 0) {
 			/* ith children */
+			signal(SIGINT, SIG_DFL);
 			if (i < ncmds - 1) {
 				int ofd = fileno(stdout);
 				close(ofd);
@@ -123,6 +125,7 @@ setup_pipe(char ***cmds, size_t ncmds) {
 
 void
 ussh_repl(void) {
+	signal(SIGINT, SIG_IGN);
 	for (;;) {
 		printf("$ ");
 		struct chvec *cv = ussh_read_line();
