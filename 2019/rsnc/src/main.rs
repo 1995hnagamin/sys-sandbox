@@ -1,3 +1,10 @@
+use std::env;
+
 fn main() {
-    println!("Hello, world!");
+    let args: Vec<String> = env::args().collect();
+    if args.len() < 2 {
+        println!("usage: rsnc <port>");
+        return;
+    }
+    println!("{:?}", args);
 }
