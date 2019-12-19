@@ -33,6 +33,8 @@ fn run_server(portnum: u16) -> Result<(), Box<Error>> {
 
     let connfd = accept(listenfd)?;
     handle_connection(connfd)?;
+    unistd::close(connfd)?;
+    unistd::close(listenfd)?;
     Ok(())
 }
 
