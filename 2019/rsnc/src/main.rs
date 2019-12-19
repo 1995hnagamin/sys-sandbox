@@ -1,3 +1,4 @@
+use libc::{STDIN_FILENO, STDOUT_FILENO};
 use nix::sys::select;
 use nix::sys::socket::*;
 use nix::unistd;
@@ -44,8 +45,8 @@ fn handle_connection(connfd: RawFd) -> Result<(), Box<Error>> {
     let maxfdp1 = 1 + connfd;
     let buf_len = 10;
     let mut sbs = [
-        sockbuf::SockBuf::new(0, connfd, buf_len),
-        sockbuf::SockBuf::new(connfd, 1, buf_len),
+        sockbuf::SockBuf::new(STDIN_FILENO, connfd, buf_len),
+        sockbuf::SockBuf::new(connfd, STDOUT_FILENO, buf_len),
     ];
 
     loop {
