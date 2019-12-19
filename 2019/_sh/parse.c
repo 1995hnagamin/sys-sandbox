@@ -7,7 +7,7 @@
 
 static int
 is_idchar(char c) {
-	return isalnum(c) || c == '-' || c == '/';
+	return isalnum(c) || c == '-' || c == '/' || c == ']' || c == '[';
 }
 
 struct chvec *
