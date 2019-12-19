@@ -1,4 +1,5 @@
 use std::env;
+use std::error::Error;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -6,5 +7,7 @@ fn main() {
         println!("usage: rsnc <port>");
         return;
     }
-    println!("{:?}", args);
+    let portnum: u16 = args[1].parse().expect("not a number");
+    println!("{}", portnum);
+    run_server(portnum).unwrap();
 }
