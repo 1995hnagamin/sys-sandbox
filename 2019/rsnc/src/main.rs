@@ -1,4 +1,5 @@
-use nix::sys::select::*;
+use nix::sys::select;
+use nix::sys::select::FdSet;
 use nix::sys::socket::*;
 use nix::unistd;
 use std::env;
@@ -106,7 +107,7 @@ fn handle_connection(connfd: RawFd) -> Result<(), Box<Error>> {
 
     loop {
         let (mut rset, mut wset) = make_rwset(&sbs);
-        let _nfds = select(maxfdp1, &mut rset, &mut wset, None, None);
+        let _nfds = select::select(maxfdp1, &mut rset, &mut wset, None, None);
         for p in sbs.iter_mut() {
             if rset.contains(p.infd) {
                 if p.read()? == 0 {
