@@ -4,6 +4,7 @@ use nix::unistd;
 use std::env;
 use std::error::Error;
 use std::os::unix::io::RawFd;
+use std::vec::Vec;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -38,20 +39,20 @@ fn run_server(portnum: u16) -> Result<(), Box<Error>> {
     Ok(())
 }
 
-struct SockBuf<'a> {
+struct SockBuf {
     infd: RawFd,
     outfd: RawFd,
-    buf: &'a mut [u8],
+    buf: Vec<u8>,
     cur: usize,
     end: usize,
 }
 
-impl<'a> SockBuf<'a> {
-    fn new(infd: RawFd, outfd: RawFd, buf: &mut [u8]) -> SockBuf {
+impl SockBuf {
+    fn new(infd: RawFd, outfd: RawFd, bufsz: usize) -> SockBuf {
         SockBuf {
             infd,
             outfd,
-            buf,
+            buf: vec![0; bufsz],
             cur: 0,
             end: 0,
         }
@@ -77,11 +78,9 @@ fn make_rwset(sockbufs: &[SockBuf]) -> (FdSet, FdSet) {
 fn handle_connection(connfd: RawFd) -> Result<(), Box<Error>> {
     let maxfdp1 = 1 + connfd;
     let buf_len = 10;
-    let mut sendbuf: std::vec::Vec<u8> = vec![0; buf_len];
-    let mut recvbuf: std::vec::Vec<u8> = vec![0; buf_len];
     let mut sbs = [
-        SockBuf::new(0, connfd, &mut sendbuf),
-        SockBuf::new(connfd, 1, &mut recvbuf),
+        SockBuf::new(0, connfd, buf_len),
+        SockBuf::new(connfd, 1, buf_len),
     ];
 
     loop {
@@ -90,7 +89,7 @@ fn handle_connection(connfd: RawFd) -> Result<(), Box<Error>> {
         for p in sbs.iter_mut() {
             if rset.contains(p.infd) {
                 p.cur = 0;
-                let size = unistd::read(p.infd, p.buf)?;
+                let size = unistd::read(p.infd, &mut p.buf)?;
                 if size == 0 {
                     return Ok(());
                 }
