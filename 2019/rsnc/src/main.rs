@@ -57,3 +57,16 @@ impl<'a> SockBuf<'a> {
         self.cur == self.end
     }
 }
+
+fn make_rwset(sockbufs: &[SockBuf]) -> (FdSet, FdSet) {
+    let mut rset = FdSet::new();
+    let mut wset = FdSet::new();
+    for sb in sockbufs {
+        if sb.empty() {
+            rset.insert(sb.infd)
+        } else {
+            wset.insert(sb.outfd)
+        }
+    }
+    (rset, wset)
+}
