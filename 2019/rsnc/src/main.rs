@@ -31,10 +31,9 @@ fn run_server(portnum: u16) -> Result<(), Box<Error>> {
     let backlog = 5;
     listen(listenfd, backlog)?;
 
-    loop {
-        let connfd = accept(listenfd)?;
-        handle_connection(connfd)?;
-    }
+    let connfd = accept(listenfd)?;
+    handle_connection(connfd)?;
+    Ok(())
 }
 
 struct SockBuf<'a> {
