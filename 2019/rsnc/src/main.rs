@@ -44,7 +44,8 @@ fn run_server(portnum: u16) -> Result<(), Box<Error>> {
 }
 
 fn handle_connection(connfd: RawFd) -> Result<(), Box<Error>> {
-    let maxfdp1 = 1 + connfd;
+    let fds = [STDIN_FILENO, STDOUT_FILENO, connfd];
+    let maxfdp1 = 1 + fds.iter().max().unwrap();
     let mut sbs = [
         sockbuf::SockBuf::new(STDIN_FILENO, connfd, SOCKBUF_SIZE),
         sockbuf::SockBuf::new(connfd, STDOUT_FILENO, SOCKBUF_SIZE),
