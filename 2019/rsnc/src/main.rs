@@ -42,3 +42,18 @@ struct SockBuf<'a> {
     cur: usize,
     end: usize,
 }
+
+impl<'a> SockBuf<'a> {
+    fn new(infd: RawFd, outfd: RawFd, buf: &mut [u8]) -> SockBuf {
+        SockBuf {
+            infd,
+            outfd,
+            buf,
+            cur: 0,
+            end: 0,
+        }
+    }
+    fn empty(&self) -> bool {
+        self.cur == self.end
+    }
+}
