@@ -1,4 +1,6 @@
+use nix::sys::select::*;
 use nix::sys::socket::*;
+use nix::unistd;
 use std::env;
 use std::error::Error;
 use std::os::unix::io::RawFd;
@@ -30,8 +32,8 @@ fn run_server(portnum: u16) -> Result<(), Box<Error>> {
     listen(listenfd, backlog)?;
 
     loop {
-        let connfd = accept(listenfd);
-        handle_connection(connfd);
+        let connfd = accept(listenfd)?;
+        handle_connection(connfd)?;
     }
 }
 
@@ -69,4 +71,37 @@ fn make_rwset(sockbufs: &[SockBuf]) -> (FdSet, FdSet) {
         }
     }
     (rset, wset)
+}
+
+fn handle_connection(connfd: RawFd) -> Result<(), Box<Error>> {
+    let maxfdp1 = 1 + connfd;
+    let buf_len = 10;
+    let mut sendbuf: std::vec::Vec<u8> = vec![0; buf_len];
+    let mut recvbuf: std::vec::Vec<u8> = vec![0; buf_len];
+    let mut sbs = [
+        SockBuf::new(0, connfd, &mut sendbuf),
+        SockBuf::new(connfd, 1, &mut recvbuf),
+    ];
+
+    loop {
+        let (mut rset, mut wset) = make_rwset(&sbs);
+        let _nfds = select(maxfdp1, &mut rset, &mut wset, None, None);
+        for p in sbs.iter_mut() {
+            if rset.contains(p.infd) {
+                p.cur = 0;
+                let size = unistd::read(p.infd, p.buf)?;
+                if size == 0 {
+                    return Ok(());
+                }
+                p.end = size;
+            }
+            if wset.contains(p.outfd) {
+                let size = unistd::write(p.outfd, &p.buf[0..p.end])?;
+                if size == 0 {
+                    return Ok(());
+                }
+                p.cur += size;
+            }
+        }
+    }
 }
