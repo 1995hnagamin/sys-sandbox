@@ -1,6 +1,7 @@
 use nix::sys::socket::*;
 use std::env;
 use std::error::Error;
+use std::os::unix::io::RawFd;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -32,4 +33,12 @@ fn run_server(portnum: u16) -> Result<(), Box<Error>> {
         let connfd = accept(listenfd);
         handle_connection(connfd);
     }
+}
+
+struct SockBuf<'a> {
+    infd: RawFd,
+    outfd: RawFd,
+    buf: &'a mut [u8],
+    cur: usize,
+    end: usize,
 }
