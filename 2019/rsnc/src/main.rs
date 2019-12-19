@@ -8,6 +8,9 @@ use std::os::unix::io::RawFd;
 use std::vec::Vec;
 mod sockbuf;
 
+const BACKLOG_SIZE: usize = 5;
+const SOCKBUF_SIZE: usize = 10;
+
 fn main() {
     let args: Vec<String> = env::args().collect();
     if args.len() < 2 {
@@ -31,8 +34,7 @@ fn run_server(portnum: u16) -> Result<(), Box<Error>> {
     let addr = SockAddr::new_inet(InetAddr::new(ip_addr, portnum));
     bind(listenfd, &addr)?;
 
-    let backlog = 5;
-    listen(listenfd, backlog)?;
+    listen(listenfd, BACKLOG_SIZE)?;
 
     let connfd = accept(listenfd)?;
     handle_connection(connfd)?;
@@ -43,10 +45,9 @@ fn run_server(portnum: u16) -> Result<(), Box<Error>> {
 
 fn handle_connection(connfd: RawFd) -> Result<(), Box<Error>> {
     let maxfdp1 = 1 + connfd;
-    let buf_len = 10;
     let mut sbs = [
-        sockbuf::SockBuf::new(STDIN_FILENO, connfd, buf_len),
-        sockbuf::SockBuf::new(connfd, STDOUT_FILENO, buf_len),
+        sockbuf::SockBuf::new(STDIN_FILENO, connfd, SOCKBUF_SIZE),
+        sockbuf::SockBuf::new(connfd, STDOUT_FILENO, SOCKBUF_SIZE),
     ];
 
     loop {
