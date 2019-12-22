@@ -32,23 +32,17 @@ impl SockBuf {
     pub fn read(&mut self) -> nix::Result<usize> {
         self.cur = 0;
         let result = unistd::read(self.infd, &mut self.buf);
-        match result {
-            Ok(size) => {
-                self.end = size;
-                result
-            }
-            Err(_) => result,
+        if let Ok(size) = result {
+            self.end = size;
         }
+        result
     }
     pub fn write(&mut self) -> nix::Result<usize> {
         let result = unistd::write(self.outfd, &self.buf[0..self.end]);
-        match result {
-            Ok(size) => {
-                self.cur += size;
-                result
-            }
-            Err(_) => result,
+        if let Ok(size) = result {
+            self.cur += size;
         }
+        result
     }
 }
 
