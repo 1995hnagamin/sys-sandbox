@@ -3,9 +3,11 @@ name = "rsnc"
 version = "0.1.0"
 authors = ["NAGAMINE Hideaki <1995.hnagamin@gmail.com>"]
 edition = "2018"
+description = "Rust Netcat"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+clap = "2.20.3"
 libc = "0.2.43"
 nix = "0.16.0"

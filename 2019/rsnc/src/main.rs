@@ -1,25 +1,32 @@
+extern crate clap;
+use clap::{App, Arg};
 use libc::{STDIN_FILENO, STDOUT_FILENO};
 use nix::sys::select;
 use nix::sys::socket::*;
 use nix::unistd;
-use std::env;
 use std::error::Error;
 use std::os::unix::io::RawFd;
-use std::vec::Vec;
 mod sockbuf;
 
 const BACKLOG_SIZE: usize = 5;
 const SOCKBUF_SIZE: usize = 10;
 
 fn main() {
-    let args: Vec<String> = env::args().collect();
-    if args.len() < 2 {
-        println!("usage: rsnc <port>");
+    let app = App::new("rsnc").arg(
+        Arg::with_name("port")
+            .short("l")
+            .long("listen")
+            .takes_value(true),
+    );
+    let matches = app.get_matches();
+    if let Some(port) = matches.value_of("port") {
+        let portnum: u16 = port.parse().expect("not a number");
+        println!("{}", portnum);
+        run_server(portnum).unwrap();
         return;
     }
-    let portnum: u16 = args[1].parse().expect("not a number");
-    println!("{}", portnum);
-    run_server(portnum).unwrap();
+    println!("usage: rsnc -l <port>");
+    return;
 }
 
 fn run_server(portnum: u16) -> Result<(), Box<Error>> {
