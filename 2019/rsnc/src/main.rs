@@ -25,8 +25,7 @@ fn main() {
         run_server(portnum).unwrap();
         return;
     }
-    println!("usage: rsnc -l <port>");
-    return;
+    println!("{}", matches.usage());
 }
 
 fn run_server(portnum: u16) -> Result<(), Box<Error>> {
