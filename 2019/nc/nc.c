@@ -99,13 +99,11 @@ run_server(int port) {
 	int const backlog = 5;
 	listen(listenfd, backlog);
 
-	for (;;) {
-		struct sockaddr_in cliaddr;
-		socklen_t clilen = sizeof(cliaddr);
-		int connfd = accept(listenfd, (struct sockaddr *)(&cliaddr), &clilen);
-		handle_connection(connfd);
-		close(connfd);
-	}
+	struct sockaddr_in cliaddr;
+	socklen_t clilen = sizeof(cliaddr);
+	int connfd = accept(listenfd, (struct sockaddr *)(&cliaddr), &clilen);
+	handle_connection(connfd);
+	close(connfd);
 	close(listenfd);
 	return 0;
 }
