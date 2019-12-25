@@ -6,7 +6,9 @@ OBJS = nc.o
 CFLAGS = -std=c11 \
 	-Wall -Wextra -Wpedantic
 
-$(TARGET): $(OBJS)
+all: $(TARGET)
+
+nc: nc.o sockbuf.o
 
 clean:
 	rm -rf $(TARGET) $(OBJS)
