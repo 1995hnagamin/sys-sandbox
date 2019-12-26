@@ -1,4 +1,5 @@
 #include <arpa/inet.h>
+#include <errno.h>
 #include <netinet/in.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -22,7 +23,7 @@ connect_server(char *address, int port) {
 			fprintf(stderr, "invalid network address: \"%s\"\n", address);
 			return -1;
 		case -1:
-			fprintf(stderr, "error\n");
+			fprintf(stderr, "error: %s\n", strerror(errno));
 			return -1;
 	}
 	connect(connfd, (struct sockaddr *)(&servaddr), sizeof(servaddr));
