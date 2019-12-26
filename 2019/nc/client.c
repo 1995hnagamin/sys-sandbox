@@ -26,7 +26,11 @@ connect_server(char *address, int port) {
 			fprintf(stderr, "error: %s\n", strerror(errno));
 			return -1;
 	}
-	connect(connfd, (struct sockaddr *)(&servaddr), sizeof(servaddr));
+	status = connect(connfd, (struct sockaddr *)(&servaddr), sizeof(servaddr));
+	if (status == -1) {
+		fprintf(stderr, "error: %s\n", strerror(errno));
+		return -1;
+	}
 	return connfd;
 }
 
