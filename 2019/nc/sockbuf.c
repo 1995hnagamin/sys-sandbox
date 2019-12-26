@@ -4,6 +4,8 @@
 #include <unistd.h>
 #include "sockbuf.h"
 
+int fileno(FILE *stream);
+
 int max(int x, int y) {
 	return x > y ? x : y;
 }
