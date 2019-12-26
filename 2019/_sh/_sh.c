@@ -9,6 +9,8 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+int fileno(FILE *stream);
+
 size_t
 count_ncmds(struct tr_object *p) {
 	size_t cnt;
