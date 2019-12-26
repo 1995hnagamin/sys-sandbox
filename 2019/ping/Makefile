@@ -3,7 +3,7 @@
 TARGET = ping
 OBJS = ping.o
 
-CXXFLAGS = -std=c++14 \
+CFLAGS = -std=c11 \
 	-Wall -Wextra -Wpedantic
 
 all: $(TARGET)
