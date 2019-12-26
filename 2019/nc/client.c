@@ -8,7 +8,7 @@
 #include <sys/socket.h>
 #include "sockbuf.h"
 
-void
+int
 connect_server(char *hostname, int port) {
 	int connfd = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -17,14 +17,16 @@ connect_server(char *hostname, int port) {
 	servaddr.sin_family = AF_INET;
 	servaddr.sin_port = htons(port);
 	int status = inet_pton(AF_INET, hostname, &servaddr.sin_addr);
-	if (status != 1) {
-		fprintf(stderr, "error\n");
-		exit(EXIT_FAILURE);
+	switch (status) {
+		case 0:
+			fprintf(stderr, "invalid network address: \"%s\"\n", hostname);
+			return -1;
+		case -1:
+			fprintf(stderr, "error\n");
+			return -1;
 	}
 	connect(connfd, (struct sockaddr *)(&servaddr), sizeof(servaddr));
-
-	handle_connection(connfd);
-	close(connfd);
+	return connfd;
 }
 
 int
@@ -35,6 +37,11 @@ main(int argc, char *argv[]) {
 	}
 	int port;
 	sscanf(argv[2], "%d", &port);
-	connect_server(argv[1], port);
+	int connfd = connect_server(argv[1], port);
+	if (connfd < 0) {
+		exit(EXIT_FAILURE);
+	}
+	handle_connection(connfd);
+	close(connfd);
 	return 0;
 }
