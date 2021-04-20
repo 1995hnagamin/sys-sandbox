@@ -1,0 +1,12 @@
+FILES[] =
+	lexer
+	parser
+	syntax
+	prolog
+
+OCamlGeneratedFiles(lexer.mli parser.mli parser.ml)
+
+OCamlProgram(prolog, $(FILES))
+
+.DEFAULT: \
+	$(if $(NATIVE_ENABLED), prolog.opt)
