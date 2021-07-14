@@ -55,11 +55,10 @@ function ode_plot2d(gen, N; idx1=1, idx2=2)
         y[i] = u[idx2]
         i += 1
     end
-    scatter(x, y)
+    plot(x, y)
 end
 
-function sample1(;method=euler)
-    N = 200
+function sample1(;method=euler, N=200)
     gen = prob1(method; N)
     ode_plot2d(gen, N)
 end
