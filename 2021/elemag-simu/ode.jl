@@ -1,5 +1,5 @@
 using LinearAlgebra
-using Plots
+include("viz.jl"); import .Viz
 
 function euler(G, dt, x, t)
     dxdt = G(x, t)
@@ -46,21 +46,9 @@ function prob1(advance;
     end
 end
 
-function ode_plot2d(gen, N; idx1=1, idx2=2)
-    x = Array{Float32}(undef, N+1)
-    y = Array{Float32}(undef, N+1)
-    i = 1
-    for u in gen
-        x[i] = u[idx1]
-        y[i] = u[idx2]
-        i += 1
-    end
-    plot(x, y)
-end
-
 function sample1(;method=euler, N=200)
     gen = prob1(method; N)
-    ode_plot2d(gen, N)
+    Viz.plot(gen, N+1)
 end
 
 if abspath(PROGRAM_FILE) == @__FILE__
