@@ -46,17 +46,22 @@ function prob1(advance;
     end
 end
 
-function sample1(;method=euler)
-    N = 200
+function ode_plot2d(gen, N; idx1=1, idx2=2)
     x = Array{Float32}(undef, N+1)
     y = Array{Float32}(undef, N+1)
     i = 1
-    for f in prob1(method; N)
-        x[i] = f[1]
-        y[i] = f[2]
+    for u in gen
+        x[i] = u[idx1]
+        y[i] = u[idx2]
         i += 1
     end
     scatter(x, y)
+end
+
+function sample1(;method=euler)
+    N = 200
+    gen = prob1(method; N)
+    ode_plot2d(gen, N)
 end
 
 if abspath(PROGRAM_FILE) == @__FILE__
