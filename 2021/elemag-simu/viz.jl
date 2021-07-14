@@ -27,4 +27,15 @@ function decimated_scatter(gen, N; idx1=1, idx2=2)
     plt
 end
 
+function decimated_plot(gen, N; idx1=1, idx2=2)
+    bufsize = Int(floor(sqrt(N)))
+    plt = Plots.plot(1, aspect_ratio=:equal, marker=2, legend=false)
+    # plot √N points
+    for block in Iterators.partition(gen, bufsize)
+        u = popfirst!(block)
+        push!(plt, u[idx1], u[idx2])
+    end
+    plt
+end
+
 end

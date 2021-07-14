@@ -51,7 +51,8 @@ function sample1(;method=euler, N=200)
     Viz.plot(gen, N+1)
 end
 
-function prob2(advance; T = 2π, N=200, k=0.5)
+function prob2(advance; period=1, N=200, k=0.5)
+    T = period * 2π
     GMs = 1.
     function G(u, _)
         r = u[1:2]
@@ -61,6 +62,7 @@ function prob2(advance; T = 2π, N=200, k=0.5)
     end
 
     dt = T / N
+    println("dt = ", dt)
     u = [1-k, 0, 0, sqrt((1-k)/(1+k))]
 
     Channel{typeof(u)}(32) do channel
@@ -72,9 +74,9 @@ function prob2(advance; T = 2π, N=200, k=0.5)
     end
 end
 
-function sample2(;method=euler, T=2, N=1000000, k=0.6)
-    gen = prob2(method; T, N, k)
-    Viz.decimated_scatter(gen, N)
+function sample2(;method=RK4th, period=2.5, N=100000, k=0.6)
+    gen = prob2(method; period, N, k)
+    Viz.decimated_plot(gen, N+1)
 end
 
 if abspath(PROGRAM_FILE) == @__FILE__
