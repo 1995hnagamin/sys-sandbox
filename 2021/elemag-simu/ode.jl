@@ -56,8 +56,8 @@ function prob2(advance; T = 2π, N=200, k=0.5)
     function G(u, _)
         r = u[1:2]
         v = u[3:4]
-        R = sqrt(r' * r)
-        return [v; -GMs*r/(R^3)]
+        R³ = (r' * r)^(3/2)
+        return [v; -GMs*r/R³]
     end
 
     dt = T / N
