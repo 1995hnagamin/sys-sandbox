@@ -51,6 +51,32 @@ function sample1(;method=euler, N=200)
     Viz.plot(gen, N+1)
 end
 
+function prob2(advance; T = 2π, N=200, k=0.5)
+    GMs = 1.
+    function G(u, _)
+        r = u[1:2]
+        v = u[3:4]
+        R = sqrt(r' * r)
+        return [v; -GMs*r/(R^3)]
+    end
+
+    dt = T / N
+    u = [1-k, 0, 0, sqrt((1-k)/(1+k))]
+
+    Channel{typeof(u)}(32) do channel
+        put!(channel, u)
+        for i = 1:N
+            u = advance(G, dt, u, i*dt)
+            put!(channel, u)
+        end
+    end
+end
+
+function sample2(;method=euler, T=2, N=1000000, k=0.6)
+    gen = prob2(method; T, N, k)
+    Viz.decimated_scatter(gen, N)
+end
+
 if abspath(PROGRAM_FILE) == @__FILE__
     display(sample1())
 end
