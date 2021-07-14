@@ -53,12 +53,11 @@ end
 
 function prob2(advance; period=1, N=200, k=0.5)
     T = period * 2π
-    GMs = 1.
     function G(u, _)
         r = u[1:2]
         v = u[3:4]
-        R³ = (r' * r)^(3/2)
-        return [v; -GMs*r/R³]
+        R⁻³ = (r' * r)^(-3/2)
+        return [v; -r*R⁻³]
     end
 
     dt = T / N
