@@ -21,6 +21,7 @@ function RK4th(G, dt, x, t)
     return x + v * dt
 end
 
+# 荷電粒子の運動
 function prob1(advance;
         q=1., m=1., T=4π, N=100,
         E=((x, t) -> [0., 0., 0.]),
@@ -51,6 +52,7 @@ function sample1(;method=euler, N=200)
     Viz.plot(gen, N+1)
 end
 
+# ケプラー問題
 function prob2(advance; period=1, N=200, k=0.5)
     T = period * 2π
     function G(u, _)
@@ -62,7 +64,7 @@ function prob2(advance; period=1, N=200, k=0.5)
 
     dt = T / N
     println("dt = ", dt)
-    u = [1-k, 0, 0, sqrt((1-k)/(1+k))]
+    u = [1-k, 0, 0, sqrt((1-k)/(1+k))] # (x, y, vx, vy)
 
     Channel{typeof(u)}(32) do channel
         put!(channel, u)
