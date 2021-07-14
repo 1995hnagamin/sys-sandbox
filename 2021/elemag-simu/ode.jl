@@ -53,7 +53,7 @@ function sample1(;method=euler, N=200)
 end
 
 # ケプラー問題
-function prob2(advance; period=1, N=200, k=0.5)
+function prob2(advance; e=0.5, period=1, N=200)
     T = period * 2π
     function G(u, _)
         r = u[1:2]
@@ -64,7 +64,7 @@ function prob2(advance; period=1, N=200, k=0.5)
 
     dt = T / N
     println("dt = ", dt)
-    u = [1-k, 0, 0, sqrt((1-k)/(1+k))] # (x, y, vx, vy)
+    u = [1-e, 0, 0, sqrt((1-e)/(1+e))] # (x, y, vx, vy)
 
     Channel{typeof(u)}(32) do channel
         put!(channel, u)
@@ -75,9 +75,11 @@ function prob2(advance; period=1, N=200, k=0.5)
     end
 end
 
-function sample2(;method=RK4th, period=2.5, N=100000, k=0.6)
-    gen = prob2(method; period, N, k)
-    Viz.decimated_plot(gen, N+1)
+function sample2(;e=0.6, period=1, method=RK4th, N=100000)
+    gen = prob2(method; e, period, N)
+    plt = Viz.decimated_plot(gen, N+1)
+    plot!(plt, title="e=$(e), period=$(period), N=$(N)")
+    plt
 end
 
 if abspath(PROGRAM_FILE) == @__FILE__
