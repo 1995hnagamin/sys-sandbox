@@ -16,6 +16,11 @@ function plot(gen, N; idx1=1, idx2=2)
     Plots.plot(x, y, marker=2)
 end
 
+function plot_all(gen; idx1=1, idx2=2)
+    us = collect(gen)
+    Plots.plot(getindex.(us, idx1), getindex.(us, idx2), marker=2)
+end
+
 function decimated_scatter(gen, N; idx1=1, idx2=2)
     bufsize = Int(floor(sqrt(N)))
     plt = Plots.scatter(1, aspect_ratio=:equal, marker=2, legend=false)
