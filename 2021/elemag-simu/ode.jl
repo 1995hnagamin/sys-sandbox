@@ -82,6 +82,38 @@ function sample2(;e=0.6, period=1, method=RK4th, N=100000)
     plt
 end
 
+function prob3(advance; e=0.5, period=1, ds=0.1)
+    T = period * 2π
+    function G(u, _)
+        r = u[1:2]
+        v⁺ = u[3:4]
+        R² = r' * r
+        R⁻¹ = R²^(-1/2)
+        return [v⁺; v⁺*(r' * v⁺)/R² - r*R⁻¹]
+    end
+
+    u = [1-e, 0, 0, (1-e)*sqrt((1-e)/(1+e))]
+
+    Channel{typeof(u)}(32) do channel
+        put!(channel, u)
+        t_total = 0
+        i = 0
+        while t_total < T
+            u = advance(G, ds, u, i*ds)
+            put!(channel, u)
+            R = norm(u[1:2])
+            t_total += R * ds
+            i += 1
+        end
+    end
+end
+
+function sample3(;e=0.6, period=1, method=RK4th, ds=0.1)
+    gen = prob3(method; e, period, ds)
+    plt = Viz.plot_all(gen)
+    plt
+end
+
 if abspath(PROGRAM_FILE) == @__FILE__
     display(sample1())
 end
