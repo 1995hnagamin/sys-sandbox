@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "d65fb726eb417f7693c580a6194663cef874e006b479f81592f3f3d3b88ad605"
+            "sha256": "20b381f3b87c34a103a8dc59d9b6e41c17e5231958c40edcccbfc524448106b4"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -59,6 +59,10 @@
             ],
             "index": "pypi",
             "version": "==1.21.2"
+        },
+        "pyfm": {
+            "git": "https://github.com/coreylynch/pyFM.git",
+            "ref": "0696c980993889a9429e4ab0b6c7dc8be6dac4de"
         },
         "scikit-learn": {
             "hashes": [

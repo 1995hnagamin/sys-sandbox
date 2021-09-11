@@ -6,6 +6,7 @@ name = "pypi"
 [packages]
 numpy = "*"
 scikit-learn = "*"
+pyfm = {ref = "0696c980993889a9429e4ab0b6c7dc8be6dac4de", git = "https://github.com/coreylynch/pyFM.git"}
 
 [dev-packages]
 
