@@ -40,15 +40,10 @@ int main() {
   }
 
   int const threshold = 7;
-  std::vector<int> dist(20, 0);
   for (int val = 0; val < SIZE; ++val) {
-    dist[count[val]] += 1;
     if (count[val] >= threshold) {
       std::cout << to_chars(val) << "\t" << count[val] << "\n";
     }
-  }
-  for (int i = 2; i < 20; ++i) {
-    std::cout << i << "\t" << dist[i] << "\n";
   }
 
   return 0;
