@@ -1,6 +1,5 @@
 #include <array>
 #include <iostream>
-#include <numeric>
 #include <string>
 #include <vector>
 
@@ -46,15 +45,6 @@ int main() {
       std::cout << to_chars(val) << "\t" << count[val] << "\n";
     }
   }
-
-  std::vector<int> nmatch(20,0);
-  for (int val = 0; val < SIZE; ++val) {
-    nmatch[count[val]] += 1;
-  }
-  for (int i = 0; i < 20; ++i) {
-    std::cout << i << "\t" << nmatch[i] << "\n";
-  }
-  std::cout << std::accumulate(nmatch.begin()+1, nmatch.end(), 0) << std::endl;
 
   return 0;
 }
