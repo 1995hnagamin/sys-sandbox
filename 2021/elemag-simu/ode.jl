@@ -86,10 +86,10 @@ function prob3(advance; e=0.5, period=1, ds=0.1)
     T = period * 2π
     function G(u, _)
         r = u[1:2]
-        v⁺ = u[3:4]
+        v = u[3:4]
         R² = r' * r
         R⁻¹ = R²^(-1/2)
-        return [v⁺; v⁺*(r' * v⁺)/R² - r*R⁻¹]
+        return [v; v*(r' * v)/R² - r*R⁻¹]
     end
 
     u = [1-e, 0, 0, (1-e)*sqrt((1-e)/(1+e))]
