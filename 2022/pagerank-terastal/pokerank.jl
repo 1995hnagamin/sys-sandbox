@@ -1,6 +1,7 @@
-using LinearAlgebra
+import LinearAlgebra
 using Printf
 import IterTools
+import Statistics
 
 #=
     NRM: ノーマル
@@ -37,29 +38,33 @@ for (i, type) in enumerate(types)
 end
 
 M = [
+    #    N  F  W  E  G    I  F  P  G  F    P  B  R  G  D    D  S  F
+    #    R  I  T  L  R    C  G  S  R  L    S  U  C  H  R    R  T  R
+    #    M  R  R  C  S    E  T  N  D  Y    Y  G  K  T  G    K  L  Y
+
     0    0  0  0  0  0    0  0  0  0  0    0  0  0  0  0    0  0  0;
 
-    1    1  1  1  1  1    1  1  1  1  1    1  1 .5  0  1    1 .5  1;
-    1    1 .5 .5  1  2    2  1  1  1  1    1  2 .5  1 .5    1  2  1;
-    1    1  2 .5  1 .5    1  1  1  2  1    1  1  2  1 .5    1  1  1;
-    1    1  1  2 .5 .5    1  1  1  0  2    1  1  1  1 .5    1  1  1;
-    1    1 .5  2  1 .5    1  1 .5  2 .5    1 .5  2  1 .5    1 .5  1;
+    1    1  1  1  1  1    1  1  1  1  1    1  1 .5  0  1    1 .5  1;    # NRM
+    1    1 .5 .5  1  2    2  1  1  1  1    1  2 .5  1 .5    1  2  1;    # FIR
+    1    1  2 .5  1 .5    1  1  1  2  1    1  1  2  1 .5    1  1  1;    # WTR
+    1    1  1  2 .5 .5    1  1  1  0  2    1  1  1  1 .5    1  1  1;    # ELC
+    1    1 .5  2  1 .5    1  1 .5  2 .5    1 .5  2  1 .5    1 .5  1;    # GRS
 
-    1    1 .5 .5  1  2   .5  1  1  2  2    1  1  1  1  2    1 .5  1;
-    1    2  1  1  1  1    2  1 .5  1 .5   .5 .5  2  0  1    2  2 .5;
-    1    1  1  1  1  2    1  1 .5 .5  1    1  1 .5 .5  1    1  0  2;
-    1    1  2  1  2 .5    1  1  2  1  0    1 .5  2  1  1    1  2  1;
-    1    1  1  1 .5  2    1  2  1  1  1    1  2 .5  1  1    1 .5  1;
+    1    1 .5 .5  1  2   .5  1  1  2  2    1  1  1  1  2    1 .5  1;    # ICE
+    1    2  1  1  1  1    2  1 .5  1 .5   .5 .5  2  0  1    2  2 .5;    # FGT
+    1    1  1  1  1  2    1  1 .5 .5  1    1  1 .5 .5  1    1  0  2;    # PSN
+    1    1  2  1  2 .5    1  1  2  1  0    1 .5  2  1  1    1  2  1;    # GRD
+    1    1  1  1 .5  2    1  2  1  1  1    1  2 .5  1  1    1 .5  1;    # FLY
 
-    1    1  1  1  1  1    1  2  2  1  1   .5  1  1  1  1    0 .5  1;
-    1    1 .5  1  1  2    1 .5 .5  1 .5    2  1  1 .5  1    2 .5 .5;
-    1    1  2  1  1  1    2 .5  1 .5  2    1  2  1  1  1    1 .5  1;
-    1    0  1  1  1  1    1  1  1  1  1    2  1  1  2  1   .5  1  1;
-    1    1  1  1  1  1    1  1  1  1  1    1  1  1  1  2    1 .5  0;
+    1    1  1  1  1  1    1  2  2  1  1   .5  1  1  1  1    0 .5  1;    # PSY
+    1    1 .5  1  1  2    1 .5 .5  1 .5    2  1  1 .5  1    2 .5 .5;    # BUG
+    1    1  2  1  1  1    2 .5  1 .5  2    1  2  1  1  1    1 .5  1;    # RCK
+    1    0  1  1  1  1    1  1  1  1  1    2  1  1  2  1   .5  1  1;    # GHT
+    1    1  1  1  1  1    1  1  1  1  1    1  1  1  1  2    1 .5  0;    # DRG
 
-    1    1  1  1  1  1    1 .5  1  1  1    2  1  1  2  1   .5  1 .5;
-    1    1 .5 .5 .5  1    2  1  1  1  1    1  1  2  1  1    1 .5  2;
-    1    1 .5  1  1  1    1  2 .5  1  1    1  1  1  1  2    2 .5  1
+    1    1  1  1  1  1    1 .5  1  1  1    2  1  1  2  1   .5  1 .5;    # DRK
+    1    1 .5 .5 .5  1    2  1  1  1  1    1  1  2  1  1    1 .5  2;    # STL
+    1    1 .5  1  1  1    1  2 .5  1  1    1  1  1  1  2    2 .5  1     # FRY
 ]
 
 # effectiveness of a move of type tm
@@ -68,19 +73,20 @@ eff(tm, (ty1, ty2)) = M[tm, ty1] * M[tm, ty2]
 isvalid(ty) = (ty != 1)
 
 function maxeff((s1, s2, sx), (t1, t2, tx))
-    tty = isvalid(tx) ? (tx, 1) : (t1, t2)
+    tty = isvalid(tx) ? (1, tx) : (t1, t2)
     multiplier(s) = eff(s, tty) * (s == sx ? 2 : 1.5)
 
     max(multiplier(s1), multiplier(s2), eff(sx, tty)*1.5)
 end
 
-#=
 types = [
     "---",
-    "FIR", "WTR", "ELC", "GRD"
+    "NRM", "FIR", "WTR", "ELC", "GRS",
+    "ICE", "FGT", "PSN", "GRD", "FLY",
+    "PSY", "BUG", "RCK", "GHT", "DRG",
+    "DRK", "FRY"
 ]
 N_TYPES = length(types)
-=#
 
 ctyidx = Dict{Tuple{String, String, String}, Int}()
 ctrev = Dict{Int, Tuple{String, String, String}}()
@@ -112,9 +118,9 @@ end
 T = ones(sz, sz) / sz
 G = 0.85*transpose(S) + 0.15*T
 
-F = eigen(G)
+F = LinearAlgebra.eigen(G)
 scores = Vector{Float64}(F.vectors[:,sz])
-if scores[1] < 0
+if sum(scores) < 0
     scores *= -1
 end
 scores = scores / maximum(scores) * 100
@@ -141,12 +147,15 @@ open("pokerank.csv", "w") do csv
     end
 end
 
+ttscore = Dict{String,Vector{Float64}}()
+for tx in types
+    ttscore[tx] = [
+        scores[ctyidx[t1, t2, tx]]
+        for (t1, t2) in IterTools.subsets(types, Val{2}())
+    ]
+end
 
-average(xs) = sum(xs)/length(xs)
-ttas = sort([
-    (average([scores[ctyidx[t1, t2, tx]] for (t1, t2) in IterTools.subsets(types, Val{2}())]), tx)
-    for tx in types
-], rev=true)
+ttas = sort([(Statistics.mean(ttscore[tx]), tx) for tx in types], rev=true)
 
 @printf("\n[Tera Type average score]\n")
 for (score, ty) in sort(ttas,rev=true)
@@ -154,9 +163,14 @@ for (score, ty) in sort(ttas,rev=true)
 end
 
 open("ttas.csv", "w") do csv
-    @printf(csv, "# Tera Type, Average score\n")
+    @printf(csv, "# Tera Type, mean, std, min, 25%%, 50%%, 75%%, max\n")
     for row in ttas
-        score, tx = row
-        @printf(csv, "%s,%.10f\n", tx, score)
+        mean, tx = row
+        std = Statistics.std(ttscore[tx])
+        qnt = Statistics.quantile(ttscore[tx], [0.25, 0.5, 0.75])
+        minm = minimum(ttscore[tx])
+        maxm = maximum(ttscore[tx])
+        @printf(csv, "%s,%.10f,%.10f,%.10f,%.10f,%.10f,%.10f,%.10f\n",
+            tx, mean,std,minm,qnt[1],qnt[2],qnt[3],maxm)
     end
 end
