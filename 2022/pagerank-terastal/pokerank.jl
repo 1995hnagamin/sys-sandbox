@@ -79,20 +79,19 @@ function maxeff((s1, s2, sx), (t1, t2, tx))
     max(multiplier(s1), multiplier(s2), eff(sx, tty)*1.5)
 end
 
+#=
 types = [
     "---",
-    "NRM", "FIR", "WTR", "ELC", "GRS",
-    "ICE", "FGT", "PSN", "GRD", "FLY",
-    "PSY", "BUG", "RCK", "GHT", "DRG",
-    "DRK", "FRY"
+    "FIR", "WTR", "ELC", "GRD"
 ]
+=#
 N_TYPES = length(types)
 
 ctyidx = Dict{Tuple{String, String, String}, Int}()
-ctrev = Dict{Int, Tuple{String, String, String}}()
+ctyrev = Dict{Int, Tuple{String, String, String}}()
 for (i, ((t1, t2), tx)) in enumerate(IterTools.product(IterTools.subsets(types, Val{2}()), types))
     ctyidx[t1, t2, tx] = i
-    ctrev[i] = (t1, t2, tx)
+    ctyrev[i] = (t1, t2, tx)
 end
 
 sz = N_TYPES * (N_TYPES-1) ÷ 2 * N_TYPES
@@ -118,13 +117,13 @@ end
 T = ones(sz, sz) / sz
 G = 0.85*transpose(S) + 0.15*T
 
-F = LinearAlgebra.eigen(G)
+@time F = LinearAlgebra.eigen(G)
 scores = Vector{Float64}(F.vectors[:,sz])
 if sum(scores) < 0
     scores *= -1
 end
 scores = scores / maximum(scores) * 100
-result = sort([(scores[i], ctrev[i]) for i in 1:sz], rev=true)
+result = sort([(scores[i], ctyrev[i]) for i in 1:sz], rev=true)
 
 
 @printf("[Top 30]\n")
