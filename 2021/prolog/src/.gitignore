@@ -2,3 +2,5 @@ parser.ml
 parser.mli
 lexer.ml
 lexer.mli
+
+*.pl
