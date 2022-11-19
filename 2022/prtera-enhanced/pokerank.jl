@@ -81,10 +81,10 @@ function maxeff((s1, s2, sx), (t1, t2, tx))
     max(multiplier(s1), multiplier(s2), eff(sx, tty)*1.5)
 end
 
+
 types = [
     "---",
-    "WTR", "ELC", "GRD", "FLY",
-    "RCK", "DRK", "FGT", "GHT"
+    "WTR", "ELC", "GRD", "FLY"
 ]
 N_TYPES = length(types)
 
@@ -100,8 +100,9 @@ sz = N_TYPES * (N_TYPES-1) ÷ 2 * N_TYPES
 T = ones(sz, sz) / sz
 
 scores = ones(1, sz) / sz
-for iter = 1:10
-    global scores
+cezarom = ones(1, sz) / sz
+for iter = 1:1000
+    global scores, cezarom
     expect = Dict{Tuple{String, String, String},Float64}()
     for (t1, t2) in IterTools.subsets(types, Val{2}())
         for s in types
@@ -146,13 +147,26 @@ for iter = 1:10
     end
     G = 0.85*S + 0.15*T
     new_scores = scores * G
-    diff = LinearAlgebra.norm1(new_scores-scores)/sz
+    new_cezarom = cezarom * iter / (iter + 1) + new_scores / (iter + 1)
+    diff = LinearAlgebra.norm1(new_cezarom - cezarom)/sz
     println(diff)
     scores = new_scores
+    cezarom = new_cezarom
+    #=
+    result = sort([(scores[i], ctyrev[i]) for i in 1:sz], rev=true)
+    @printf("[Top 5]\n")
+    for i = 1:5
+        score, (t1, t2, tx) = result[i]
+        if t1 == "---"
+            t1, t2 = t2, t1
+        end
+        @printf("%02d: %s / %s (%s) ... %.10f\n", i, t1, t2, tx, score)
+    end
+    =#
 end
 
-scores = scores / maximum(scores) * 100
-result = sort([(scores[i], ctyrev[i]) for i in 1:sz], rev=true)
+rank = cezarom / maximum(cezarom) * 100
+result = sort([(rank[i], ctyrev[i]) for i in 1:sz], rev=true)
 
 @printf("[Top 30]\n")
 for i = 1:30
@@ -161,4 +175,43 @@ for i = 1:30
         t1, t2 = t2, t1
     end
     @printf("%02d: %s / %s (%s) ... %.10f\n", i, t1, t2, tx, score)
+end
+
+open("pokerank.csv", "w") do csv
+    @printf(csv, "# Type 1, Type 2, Tera Type, Score\n")
+    for row in result
+        score, (t1, t2, tx) = row
+        if t1 == "---"
+            t1, t2 = t2, t1
+        end
+        @printf(csv, "%s,%s,%s,%.10f\n", t1, t2, tx, score)
+    end
+end
+
+ttscore = Dict{String,Vector{Float64}}()
+for tx in types
+    ttscore[tx] = [
+        rank[ctyidx[t1, t2, tx]]
+        for (t1, t2) in IterTools.subsets(types, Val{2}())
+    ]
+end
+
+ttas = sort([(Statistics.mean(ttscore[tx]), tx) for tx in types], rev=true)
+
+@printf("\n[Tera Type average score]\n")
+for (score, ty) in sort(ttas,rev=true)
+    @printf("%s: %.10f\n", ty, score)
+end
+
+open("ttas.csv", "w") do csv
+    @printf(csv, "# Tera Type, mean, std, min, 25%%, 50%%, 75%%, max\n")
+    for row in ttas
+        mean, tx = row
+        std = Statistics.std(ttscore[tx])
+        qnt = Statistics.quantile(ttscore[tx], [0.25, 0.5, 0.75])
+        minm = minimum(ttscore[tx])
+        maxm = maximum(ttscore[tx])
+        @printf(csv, "%s,%.10f,%.10f,%.10f,%.10f,%.10f,%.10f,%.10f\n",
+            tx, mean,std,minm,qnt[1],qnt[2],qnt[3],maxm)
+    end
 end
