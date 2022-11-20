@@ -3,6 +3,16 @@ using Printf
 import IterTools
 import Statistics
 
+function argmax3(a, b, c)
+    if a >= b && a >= c
+        1
+    elseif b >= a && b >= c
+        2
+    else
+        3
+    end
+end
+
 #=
     NRM: ノーマル
     FIR: ほのお
@@ -32,7 +42,7 @@ const ALLTYPE_ABBREVS = [ # all types
 ]
 const NALLTYPES = length(ALLTYPE_ABBREVS)
 
-ALTYIDX = Dict{String, Int}()
+ALTYIDX = Dict{String, Int64}()
 for (i, type) in enumerate(ALLTYPE_ABBREVS)
     ALTYIDX[type] = i
 end
@@ -69,31 +79,35 @@ const TYPE_CHART = [
 
 const TYPE_ABBREVS = [
     "---",
-    "WTR", "ELC", "GRD", "FLY"
+    "NRM", "FIR", "WTR", "ELC", "GRS",
+    "ICE", "FGT", "PSN", "GRD", "FLY",
+    "PSY", "BUG", "RCK", "GHT", "DRG",
+    "DRK", "STL", "FRY"
 ]
 const NTYPES = length(TYPE_ABBREVS)
 
-M = Matrix{Float64}(undef, NTYPES, NTYPES)
+Ma = Matrix{Float64}(undef, NTYPES, NTYPES)
 for i = 1:NTYPES
     ti = ALTYIDX[TYPE_ABBREVS[i]]
     for j = 1:NTYPES
         tj = ALTYIDX[TYPE_ABBREVS[j]]
-        M[i, j] = TYPE_CHART[ti, tj]
+        Ma[i, j] = TYPE_CHART[ti, tj]
     end
 end
+const M = Ma
 
 # effectiveness of a move of type tm
-eff(tm, (ty1, ty2)) = M[tm, ty1] * M[tm, ty2]
+eff(tm::Int64, (ty1, ty2)::Tuple{Int64,Int64}) = M[tm, ty1] * M[tm, ty2]
 
-NULLT = 1
-isvalid(ty) = (ty != NULLT)
+const NULLT = 1
+isvalid(ty::Int64) = (ty != NULLT)
 
-teff(tm, (t1, t2, tx)) = isvalid(tx) ? eff(tm, (NULLT, tx)) : eff(tm, (t1, t2))
+teff(tm::Int64, (t1, t2, tx)::Tuple{Int64,Int64,Int64}) = isvalid(tx) ? eff(tm, (NULLT, tx)) : eff(tm, (t1, t2))
 
 sz = NTYPES * (NTYPES-1) ÷ 2 * NTYPES
 
-CTYIDX = Dict{Tuple{Int, Int, Int}, Int}()
-CTYREV = Vector{Tuple{Int,Int,Int}}(undef, sz)
+CTYIDX = Array{Int64}(undef, NTYPES, NTYPES, NTYPES)
+CTYREV = Vector{Tuple{Int64,Int64,Int64}}(undef, sz)
 for (i, ((t1, t2), tx)) in enumerate(IterTools.product(IterTools.subsets(1:NTYPES, Val{2}()), 1:NTYPES))
     CTYIDX[t1, t2, tx] = i
     CTYREV[i] = (t1, t2, tx)
@@ -108,11 +122,11 @@ G = zeros(sz, sz)
 for iter = 1:100
     global importance, cezarom, A, G
     expect = Vector{Float64}(undef, sz)
-    @time for idx in 1:sz
+    for idx in 1:sz
         (t1, t2, s) = CTYREV[idx]
         ptot = importance[CTYIDX[t1, t2, NULLT]]
         ex = ptot * eff(s, (t1, t2)) # no terastal
-        for tx = 1:NTYPES
+        for tx = 2:NTYPES
             p = importance[CTYIDX[t1, t2, tx]]
             ptot += p
             ex += p * eff(s, (NULLT, tx)) # terastal tx
@@ -120,20 +134,21 @@ for iter = 1:100
         ex /= ptot
         expect[idx] = ex
     end
-    function select((s1, s2, sx), (t1, t2))
-        stab(s) = (s == sx ? 2 : 1.5)
-        cands = sort([
-            (stab(s1)*expect[CTYIDX[t1, t2, s1]], s1),
-            (stab(s2)*expect[CTYIDX[t1, t2, s2]], s2),
-            (1.5*expect[CTYIDX[t1, t2, sx]], sx)
-        ], rev=true)
-        return cands[1][2]
+    function select(sty::Tuple{Int64,Int64,Int64}, (t1, t2)::Tuple{Int64,Int64})
+        (s1, s2, sx) = sty
+        stab(s::Int64) = (s == sx ? 2.0 : 1.5)
+        i = argmax3(
+            expect[CTYIDX[t1, t2, s1]] * stab(s1),
+            expect[CTYIDX[t1, t2, s2]] * stab(s2),
+            expect[CTYIDX[t1, t2, sx]] * 1.5
+        )
+        return sty[i]
     end
     A .= 0
     @time Threads.@threads for i = 1:sz
         sty = CTYREV[i]
         (s1, s2, sx) = sty
-        for j = 1:sz
+        Threads.@threads for j = 1:sz
             tty = CTYREV[j]
             (t1, t2, tx) = tty
             wst = max(1.5/8, teff(select(sty, (t1, t2)), tty))
