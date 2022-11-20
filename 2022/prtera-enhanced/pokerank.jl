@@ -99,18 +99,32 @@ const M = Ma
 # effectiveness of a move of type tm
 eff(tm::Int64, (ty1, ty2)::Tuple{Int64,Int64}) = M[tm, ty1] * M[tm, ty2]
 
-const NULLT = 1
+stab(s::Int64, sx::Int64) = (s == sx ? 2.0::Float64 : 1.5::Float64)
+
+const NULLT = 1::Int64
 isvalid(ty::Int64) = (ty != NULLT)
 
 teff(tm::Int64, (t1, t2, tx)::Tuple{Int64,Int64,Int64}) = isvalid(tx) ? eff(tm, (NULLT, tx)) : eff(tm, (t1, t2))
 
 sz = NTYPES * (NTYPES-1) ÷ 2 * NTYPES
 
-CTYIDX = Array{Int64}(undef, NTYPES, NTYPES, NTYPES)
-CTYREV = Vector{Tuple{Int64,Int64,Int64}}(undef, sz)
+CTYIDXa = Array{Int64}(undef, NTYPES, NTYPES, NTYPES)
+CTYREVa = Vector{Tuple{Int64,Int64,Int64}}(undef, sz)
 for (i, ((t1, t2), tx)) in enumerate(IterTools.product(IterTools.subsets(1:NTYPES, Val{2}()), 1:NTYPES))
-    CTYIDX[t1, t2, tx] = i
-    CTYREV[i] = (t1, t2, tx)
+    CTYIDXa[t1, t2, tx] = i
+    CTYREVa[i] = (t1, t2, tx)
+end
+const CTYIDX = CTYIDXa
+const CTYREV = CTYREVa
+
+function select(expect::Vector{Float64}, sty::Tuple{Int64,Int64,Int64}, (t1, t2)::Tuple{Int64,Int64})
+    (s1, s2, sx) = sty
+    i = argmax3(
+        expect[CTYIDX[t1, t2, s1]] * stab(s1, sx),
+        expect[CTYIDX[t1, t2, s2]] * stab(s2, sx),
+        expect[CTYIDX[t1, t2, sx]] * 1.5
+    )
+    return sty[i]
 end
 
 T = ones(sz, sz) / sz
@@ -119,7 +133,7 @@ importance = ones(1, sz) / sz
 cezarom = ones(1, sz) / sz
 A = zeros(sz, sz)
 G = zeros(sz, sz)
-for iter = 1:100
+for iter = 1:300
     global importance, cezarom, A, G
     expect = Vector{Float64}(undef, sz)
     for idx in 1:sz
@@ -134,16 +148,6 @@ for iter = 1:100
         ex /= ptot
         expect[idx] = ex
     end
-    function select(sty::Tuple{Int64,Int64,Int64}, (t1, t2)::Tuple{Int64,Int64})
-        (s1, s2, sx) = sty
-        stab(s::Int64) = (s == sx ? 2.0 : 1.5)
-        i = argmax3(
-            expect[CTYIDX[t1, t2, s1]] * stab(s1),
-            expect[CTYIDX[t1, t2, s2]] * stab(s2),
-            expect[CTYIDX[t1, t2, sx]] * 1.5
-        )
-        return sty[i]
-    end
     A .= 0
     @time Threads.@threads for i = 1:sz
         sty = CTYREV[i]
@@ -151,8 +155,12 @@ for iter = 1:100
         Threads.@threads for j = 1:sz
             tty = CTYREV[j]
             (t1, t2, tx) = tty
-            wst = max(1.5/8, teff(select(sty, (t1, t2)), tty))
-            wts = max(1.5/8, teff(select(tty, (s1, s2)), sty))
+            si = select(expect, sty, (t1, t2))
+            sstab = ((si == s1 || si == s2) && si == sx) ? 2.0 : 1.5
+            ti = select(expect, tty, (s1, s2))
+            tstab = ((ti == t1 || ti == t2) && ti == tx) ? 2.0 : 1.5
+            wst = max(1.5/8, teff(si, tty)*sstab)
+            wts = max(1.5/8, teff(ti, sty)*tstab)
             weight = log(2, wts/wst)
             if weight > 0
                 A[i, j] = weight
