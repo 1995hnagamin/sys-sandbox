@@ -23,21 +23,21 @@ import Statistics
     STL: はがね
     FRY: フェアリー
 =#
-ALLTYPE_ABBREVS = [ # all types
+const ALLTYPE_ABBREVS = [ # all types
     "---",
     "NRM", "FIR", "WTR", "ELC", "GRS",
     "ICE", "FGT", "PSN", "GRD", "FLY",
     "PSY", "BUG", "RCK", "GHT", "DRG",
     "DRK", "STL", "FRY"
 ]
-NALLTYPES = length(ALLTYPE_ABBREVS)
+const NALLTYPES = length(ALLTYPE_ABBREVS)
 
 ALTYIDX = Dict{String, Int}()
 for (i, type) in enumerate(ALLTYPE_ABBREVS)
     ALTYIDX[type] = i
 end
 
-TYPE_CHART = [
+const TYPE_CHART = [
     #    N  F  W  E  G    I  F  P  G  F    P  B  R  G  D    D  S  F
     #    R  I  T  L  R    C  G  S  R  L    S  U  C  H  R    R  T  R
     #    M  R  R  C  S    E  T  N  D  Y    Y  G  K  T  G    K  L  Y
@@ -67,11 +67,11 @@ TYPE_CHART = [
     1    1 .5  1  1  1    1  2 .5  1  1    1  1  1  1  2    2 .5  1     # FRY
 ]
 
-TYPE_ABBREVS = [
+const TYPE_ABBREVS = [
     "---",
     "WTR", "ELC", "GRD", "FLY"
 ]
-NTYPES = length(TYPE_ABBREVS)
+const NTYPES = length(TYPE_ABBREVS)
 
 M = Matrix{Float64}(undef, NTYPES, NTYPES)
 for i = 1:NTYPES
