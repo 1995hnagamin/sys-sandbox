@@ -103,13 +103,15 @@ T = ones(sz, sz) / sz
 
 importance = ones(1, sz) / sz
 cezarom = ones(1, sz) / sz
+A = zeros(sz, sz)
+G = zeros(sz, sz)
 for iter = 1:100
-    global importance, cezarom
+    global importance, cezarom, A, G
     expect = Vector{Float64}(undef, sz)
-    for idx in 1:sz
+    @time for idx in 1:sz
         (t1, t2, s) = CTYREV[idx]
-        ptot = importance[CTYIDX[t1, t2, NULLT]] # no terastal
-        ex = ptot * eff(s, (t1, t2))
+        ptot = importance[CTYIDX[t1, t2, NULLT]]
+        ex = ptot * eff(s, (t1, t2)) # no terastal
         for tx = 1:NTYPES
             p = importance[CTYIDX[t1, t2, tx]]
             ptot += p
@@ -127,26 +129,26 @@ for iter = 1:100
         ], rev=true)
         return cands[1][2]
     end
-    A = zeros(sz, sz)
-    for j = 1:sz
-        tty = CTYREV[j]
-        (t1, t2, tx) = tty
-        for i = 1:sz
-            sty = CTYREV[i]
-            (s1, s2, sx) = sty
-            wst = max(1.5/8, teff(select((s1, s2, sx), (t1, t2)), tty))
-            wts = max(1.5/8, teff(select((t1, t2, tx), (s1, s2)), sty))
+    A .= 0
+    @time Threads.@threads for i = 1:sz
+        sty = CTYREV[i]
+        (s1, s2, sx) = sty
+        for j = 1:sz
+            tty = CTYREV[j]
+            (t1, t2, tx) = tty
+            wst = max(1.5/8, teff(select(sty, (t1, t2)), tty))
+            wts = max(1.5/8, teff(select(tty, (s1, s2)), sty))
             weight = log(2, wts/wst)
             if weight > 0
                 A[i, j] = weight
             end
         end
     end
-    S = zeros(sz, sz)
     for i = 1:sz
-        S[i, :] = A[i, :]/sum(A[i,:])
+        tot = sum(A[i,:])
+        A[i, :] /= tot
     end
-    G = 0.85*S + 0.15*T
+    G = 0.85*A + 0.15*T
     new_importance = importance * G
     new_cezarom = cezarom * iter / (iter + 1) + new_importance / (iter + 1)
     diff = LinearAlgebra.norm1(new_cezarom - cezarom)/sz
