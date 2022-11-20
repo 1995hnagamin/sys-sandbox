@@ -154,14 +154,14 @@ for iter = 1:100
     importance = new_importance
     cezarom = new_cezarom
     #=
-    result = sort([(scores[i], ctyrev[i]) for i in 1:sz], rev=true)
+    rank = sort([(importance[i], CTYREV[i]) for i in 1:sz], rev=true)
     @printf("[Top 5]\n")
     for i = 1:5
-        score, (t1, t2, tx) = result[i]
-        if t1 == "---"
+        score, (t1, t2, tx) = rank[i]
+        if t1 == NULLT
             t1, t2 = t2, t1
         end
-        @printf("%02d: %s / %s (%s) ... %.10f\n", i, t1, t2, tx, score)
+        @printf("%02d: %s / %s (%s) ... %.10f\n", i, TYPE_ABBREVS[t1], TYPE_ABBREVS[t2], TYPE_ABBREVS[tx], score)
     end
     =#
 end
@@ -179,7 +179,7 @@ for i = 1:30
 end
 
 open("pokerank.csv", "w") do csv
-    @printf(csv, "# Type 1, Type 2, Tera Type, Score, Importance\n")
+    @printf(csv, "# Type 1, Type 2, Tera Type, Importance, Score\n")
     for row in result
         score, (t1, t2, tx) = row
         imp = cezarom[CTYIDX[t1, t2, tx]]
