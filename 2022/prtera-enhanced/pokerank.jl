@@ -90,13 +90,6 @@ isvalid(ty) = (ty != NULLT)
 
 teff(tm, (t1, t2, tx)) = isvalid(tx) ? eff(tm, (NULLT, tx)) : eff(tm, (t1, t2))
 
-function maxeff((s1, s2, sx), (t1, t2, tx))
-    tty = isvalid(tx) ? (NULLT, tx) : (t1, t2)
-    multiplier(s) = eff(s, tty) * (s == sx ? 2 : 1.5)
-
-    max(multiplier(s1), multiplier(s2), eff(sx, tty)*1.5)
-end
-
 sz = NTYPES * (NTYPES-1) ÷ 2 * NTYPES
 
 CTYIDX = Dict{Tuple{Int, Int, Int}, Int}()
