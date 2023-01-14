@@ -120,6 +120,37 @@ Node *new_node(NodeKind kind, Node *lhs, Node *rhs) {
   node->rhs = rhs;
   return node;
 }
+
+void print_node(Node *node, bool nl) {
+  if (node->kind == ND_INT) {
+    fprintf(stderr, "%d", node->val);
+    if (nl) {
+      fprintf(stderr, "\n");
+    }
+    return;
+  }
+  fprintf(stderr, "(");
+  switch (node->kind) {
+  case ND_ADD:
+    fprintf(stderr, "+");
+    break;
+  case ND_SUB:
+    fprintf(stderr, "-");
+    break;
+  default:
+    fprintf(stderr, "fatal error");
+    exit(1);
+  }
+  fprintf(stderr, " ");
+  print_node(node->lhs, false);
+  fprintf(stderr, " ");
+  print_node(node->rhs, false);
+  fprintf(stderr, ")");
+  if (nl) {
+    fprintf(stderr, "\n");
+  }
+}
+
 int main(int argc, char **argv) {
   if (argc != 2) {
     fprintf(stderr, "wrong number of arguments: expected 2, got %d\n", argc);
