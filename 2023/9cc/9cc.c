@@ -76,7 +76,7 @@ bool at_eof() {
 
 bool issymbol(char c) {
   return c == '+' || c == '-'
-    || c == '*'
+    || c == '*' || c == '/'
     || c == '(' || c == ')';
 }
 
@@ -108,6 +108,7 @@ typedef enum {
   ND_ADD, // +
   ND_SUB, // -
   ND_MUL, // *
+  ND_DIV, // /
   ND_INT, // integers
 } NodeKind;
 
@@ -146,6 +147,9 @@ void print_node(Node *node, bool nl) {
     break;
   case ND_MUL:
     fprintf(stderr, "*");
+    break;
+  case ND_DIV:
+    fprintf(stderr, "/");
     break;
   default:
     fprintf(stderr, "fatal error");
@@ -190,6 +194,8 @@ Node *mul() {
   for (;;) {
     if (consume('*')) {
       node = new_node(ND_MUL, node, primary());
+    } else if (consume('/')) {
+      node = new_node(ND_DIV, node, primary());
     } else {
       return node;
     }
@@ -224,6 +230,10 @@ void gen(Node *node) {
     break;
   case ND_MUL:
     printf("  imul rax, rdi\n");
+    break;
+  case ND_DIV:
+    printf("  cqo\n");
+    printf("  idiv rdi\n");
     break;
   case ND_INT:
     fprintf(stderr, "fatal error");
