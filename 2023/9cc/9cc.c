@@ -74,6 +74,10 @@ bool at_eof() {
   return CUR_TOKEN->kind == TK_EOF;
 }
 
+bool issymbol(char c) {
+  return c == '+' || c == '-';
+}
+
 Token *tokenize(char *p) {
   Token head;
   head.next = NULL;
@@ -83,7 +87,7 @@ Token *tokenize(char *p) {
       p++;
       continue;
     }
-    if (*p == '+' || *p == '-') {
+    if (issymbol(*p)) {
       cur = new_token(TK_RESERVED, cur, p++);
       continue;
     }
@@ -151,6 +155,56 @@ void print_node(Node *node, bool nl) {
   }
 }
 
+Node *new_node_num(int val) {
+  Node *node = calloc(1, sizeof(Node));
+  node->kind = ND_INT;
+  node->val = val;
+  return node;
+}
+
+Node *primary();
+
+Node *expr() {
+  Node *node = primary();
+  for (;;) {
+    if (consume('+')) {
+      node = new_node(ND_ADD, node, primary());
+    } else if (consume('-')) {
+      node = new_node(ND_SUB, node, primary());
+    } else {
+      return node;
+    }
+  }
+}
+
+Node *primary() {
+  return new_node_num(expect_number());
+}
+
+void gen(Node *node) {
+  if (node->kind == ND_INT) {
+    printf("  push %d\n", node->val);
+    return;
+  }
+  gen(node->lhs);
+  gen(node->rhs);
+
+  printf("  pop rdi\n");
+  printf("  pop rax\n");
+  switch (node->kind) {
+  case ND_ADD:
+    printf("  add rax, rdi\n");
+    break;
+  case ND_SUB:
+    printf("  sub rax, rdi\n");
+    break;
+  case ND_INT:
+    fprintf(stderr, "fatal error");
+    exit(1);
+  }
+  printf("  push rax\n");
+}
+
 int main(int argc, char **argv) {
   if (argc != 2) {
     fprintf(stderr, "wrong number of arguments: expected 2, got %d\n", argc);
@@ -162,16 +216,12 @@ int main(int argc, char **argv) {
 
   INPUT_HEAD = argv[1];
   CUR_TOKEN = tokenize(INPUT_HEAD);
+
   printf("_main:\n");
-  printf("  mov rax, %d\n", expect_number());
-  while (!at_eof()) {
-    if (consume('+')) {
-      printf("  add rax, %d\n", expect_number());
-      continue;
-    }
-    expect('-');
-    printf("  sub rax, %d\n", expect_number());
-  }
+  Node *node = expr();
+  print_node(node, true);
+  gen(node);
+  printf("  pop rax\n");
   printf("  ret\n");
   return 0;
 }
