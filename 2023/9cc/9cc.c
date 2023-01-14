@@ -82,7 +82,8 @@ bool at_eof() {
 }
 
 bool is_2char_symbol(char *p) {
-  return strncmp(p, "<=", 2) == 0 || strncmp(p, ">=", 2) == 0;
+  return strncmp(p, "<=", 2) == 0 || strncmp(p, ">=", 2) == 0
+    || strncmp(p, "==", 2) == 0 || strncmp(p, "!=", 2) == 0;
 }
 
 bool is_symbol(char c) {
@@ -128,6 +129,8 @@ typedef enum {
   ND_SUB, // -
   ND_MUL, // *
   ND_DIV, // /
+  ND_EQU, // ==
+  ND_NEQ, // !=
   ND_LES, // <
   ND_LEQ, // <=
   ND_INT, // integers
@@ -172,6 +175,12 @@ void print_node(Node *node, bool nl) {
   case ND_DIV:
     fprintf(stderr, "/");
     break;
+  case ND_EQU:
+    fprintf(stderr, "==");
+    break;
+  case ND_NEQ:
+    fprintf(stderr, "!=");
+    break;
   case ND_LES:
     fprintf(stderr, "<");
     break;
@@ -199,17 +208,31 @@ Node *new_node_num(int val) {
   return node;
 }
 
+Node *equality();
+Node *relational();
 Node *add();
-Node *rational();
 Node *mul();
 Node *unary();
 Node *primary();
 
 Node *expr() {
-  return rational();
+  return equality();
 }
 
-Node *rational() {
+Node *equality() {
+  Node *node = relational();
+  for (;;) {
+    if (consume("==")) {
+      node = new_node(ND_EQU, node, relational());
+    } else if (consume("!=")) {
+      node = new_node(ND_NEQ, node, relational());
+    } else {
+      return node;
+    }
+  }
+}
+
+Node *relational() {
   Node *node = add();
   for (;;) {
     if (consume("<=")) {
@@ -294,6 +317,16 @@ void gen(Node *node) {
   case ND_DIV:
     printf("  cqo\n");
     printf("  idiv rdi\n");
+    break;
+  case ND_EQU:
+    printf("  cmp rax, rdi\n");
+    printf("  sete al\n");
+    printf("  movzx rax, al\n");
+    break;
+  case ND_NEQ:
+    printf("  cmp rax, rdi\n");
+    printf("  setne al\n");
+    printf("  movzx rax, al\n");
     break;
   case ND_LES:
     printf("  cmp rax, rdi\n");
