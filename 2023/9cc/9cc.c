@@ -29,11 +29,19 @@ Token *new_token(TokenKind kind, Token *cur, char *str) {
 }
 
 Token *CUR_TOKEN;
+char *INPUT_HEAD;
 
-void error(char *fmt, ...) {
+void error_at(char *loc, char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
-  vfprintf(stderr, fmt, ap);
+
+  int pos = loc - INPUT_HEAD;
+  fprintf(stderr, "%s\n", INPUT_HEAD);
+  for (int i = 0; i < pos; ++i) {
+    fprintf(stderr, " ");
+  }
+  fprintf(stderr, "^ ");
+  fprintf(stderr, fmt, ap);
   fprintf(stderr, "\n");
   exit(1);
 }
@@ -48,14 +56,14 @@ bool consume(char op) {
 
 void expect(char op) {
   if (CUR_TOKEN->kind != TK_RESERVED || CUR_TOKEN-> str[0] != op) {
-    error("not equal to '%c'", op);
+    error_at(CUR_TOKEN->str, "not equal to '%c'", op);
   }
   CUR_TOKEN = CUR_TOKEN->next;
 }
 
 int expect_number() {
   if (CUR_TOKEN->kind != TK_NUM) {
-    error("not a number");
+    error_at(CUR_TOKEN->str, "not a number");
   }
   int val = CUR_TOKEN->val;
   CUR_TOKEN = CUR_TOKEN->next;
@@ -84,7 +92,7 @@ Token *tokenize(char *p) {
       cur->val = strtol(p, &p, 10);
       continue;
     }
-    error("tokenization failed");
+    error_at(p, "tokenization failed");
   }
   new_token(TK_EOF, cur, p);
   return head.next;
@@ -99,7 +107,8 @@ int main(int argc, char **argv) {
   printf(".intel_syntax noprefix\n");
   printf(".globl _main\n");
 
-  CUR_TOKEN = tokenize(argv[1]);
+  INPUT_HEAD = argv[1];
+  CUR_TOKEN = tokenize(INPUT_HEAD);
   printf("_main:\n");
   printf("  mov rax, %d\n", expect_number());
   while (!at_eof()) {
