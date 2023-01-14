@@ -55,9 +55,18 @@ bool consume(char *op) {
   return true;
 }
 
+Token *consume_ident() {
+  Token *ident = CUR_TOKEN;
+  if (ident->kind != TK_IDENT) {
+    return NULL;
+  }
+  CUR_TOKEN = CUR_TOKEN->next;
+  return ident;
+}
+
 void expect(char *op) {
   if (!is_operator(op, CUR_TOKEN)) {
-    error_at(CUR_TOKEN->str, "not equal to '%c'", op);
+    error_at(CUR_TOKEN->str, "not equal to \"%s\"", op);
   }
   CUR_TOKEN = CUR_TOKEN->next;
 }
@@ -84,7 +93,9 @@ bool is_symbol(char c) {
   return c == '+' || c == '-'
     || c == '*' || c == '/'
     || c == '<' || c == '>'
-    || c == '(' || c == ')';
+    || c == '(' || c == ')'
+    || c == '='
+    || c == ';';
 }
 
 Token *tokenize(char *p) {
@@ -107,6 +118,11 @@ Token *tokenize(char *p) {
       cur->len = 1;
       continue;
     }
+    if ('a' <= *p && *p <= 'z') {
+        cur = new_token(TK_IDENT, cur, p++);
+        cur->len = 1;
+        continue;
+    }
     if (isdigit(*p)) {
       cur = new_token(TK_NUM, cur, p);
       cur->val = strtol(p, &p, 10);
@@ -126,7 +142,7 @@ Node *new_node(NodeKind kind, Node *lhs, Node *rhs) {
   return node;
 }
 
-void print_node(Node *node, bool nl) {
+void view_node(Node *node, bool nl) {
   if (node->kind == ND_INT) {
     fprintf(stderr, "%d", node->val);
     if (nl) {
@@ -134,8 +150,18 @@ void print_node(Node *node, bool nl) {
     }
     return;
   }
+  if (node->kind == ND_LVAR) {
+    fprintf(stderr, "[%d]", node->offset);
+    if (nl) {
+      fprintf(stderr, "\n");
+    }
+    return;
+  }
   fprintf(stderr, "(");
   switch (node->kind) {
+  case ND_ASSIGN:
+    fprintf(stderr, "=");
+    break;
   case ND_ADD:
     fprintf(stderr, "+");
     break;
@@ -165,13 +191,20 @@ void print_node(Node *node, bool nl) {
     exit(1);
   }
   fprintf(stderr, " ");
-  print_node(node->lhs, false);
+  view_node(node->lhs, false);
   fprintf(stderr, " ");
-  print_node(node->rhs, false);
+  view_node(node->rhs, false);
   fprintf(stderr, ")");
   if (nl) {
     fprintf(stderr, "\n");
   }
+}
+
+Node *new_node_ident(int offset) {
+  Node *node = calloc(1, sizeof(Node));
+  node->kind = ND_LVAR;
+  node->offset = offset;
+  return node;
 }
 
 Node *new_node_num(int val) {
@@ -181,6 +214,10 @@ Node *new_node_num(int val) {
   return node;
 }
 
+void program();
+Node *stmt();
+Node *expr();
+Node *assign();
 Node *equality();
 Node *relational();
 Node *add();
@@ -188,8 +225,35 @@ Node *mul();
 Node *unary();
 Node *primary();
 
+void parse() {
+  program();
+}
+
+Node *code[100];
+void program() {
+  int i = 0;
+  while (!at_eof()) {
+    code[i++] = stmt();
+  }
+  code[i] = NULL;
+}
+
+Node *stmt() {
+  Node *node = expr();
+  expect(";");
+  return node;
+}
+
 Node *expr() {
-  return equality();
+  return assign();
+}
+
+Node *assign() {
+  Node *node = equality();
+  if (consume("=")) {
+    node = new_node(ND_ASSIGN, node, assign());
+  }
+  return node;
 }
 
 Node *equality() {
@@ -263,6 +327,10 @@ Node *primary() {
     Node *node = expr();
     expect(")");
     return node;
+  }
+  Token *tok = consume_ident();
+  if (tok) {
+    return new_node_ident((tok->str[0] - 'a' + 1)*8);
   }
   return new_node_num(expect_number());
 }
