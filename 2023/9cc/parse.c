@@ -1,25 +1,13 @@
 #include <ctype.h>
 #include <stdarg.h>
 #include <stdbool.h>
-#include <stdio.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
+#include "9cc.h"
 
-typedef enum {
-  TK_RESERVED,
-  TK_NUM,
-  TK_EOF,
-} TokenKind;
-
-struct Token {
-  TokenKind kind;
-  struct Token *next;
-  int val;
-  char *str;
-  int len;
-};
-
-typedef struct Token Token;
+Token *CUR_TOKEN;
+char *INPUT_HEAD;
 
 Token *new_token(TokenKind kind, Token *cur, char *str) {
   Token *tok = calloc(1, sizeof(Token));
@@ -28,9 +16,6 @@ Token *new_token(TokenKind kind, Token *cur, char *str) {
   cur->next = tok;
   return tok;
 }
-
-Token *CUR_TOKEN;
-char *INPUT_HEAD;
 
 void error_at(char *loc, char *fmt, ...) {
   va_list ap;
@@ -123,27 +108,6 @@ Token *tokenize(char *p) {
   new_token(TK_EOF, cur, p);
   return head.next;
 }
-
-typedef enum {
-  ND_ADD, // +
-  ND_SUB, // -
-  ND_MUL, // *
-  ND_DIV, // /
-  ND_EQU, // ==
-  ND_NEQ, // !=
-  ND_LES, // <
-  ND_LEQ, // <=
-  ND_INT, // integers
-} NodeKind;
-
-struct Node {
-  NodeKind kind;
-  struct Node *lhs;
-  struct Node *rhs;
-  int val;
-};
-
-typedef struct Node Node;
 
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs) {
   Node *node = calloc(1, sizeof(Node));
@@ -292,76 +256,4 @@ Node *primary() {
     return node;
   }
   return new_node_num(expect_number());
-}
-
-void gen(Node *node) {
-  if (node->kind == ND_INT) {
-    printf("  push %d\n", node->val);
-    return;
-  }
-  gen(node->lhs);
-  gen(node->rhs);
-
-  printf("  pop rdi\n");
-  printf("  pop rax\n");
-  switch (node->kind) {
-  case ND_ADD:
-    printf("  add rax, rdi\n");
-    break;
-  case ND_SUB:
-    printf("  sub rax, rdi\n");
-    break;
-  case ND_MUL:
-    printf("  imul rax, rdi\n");
-    break;
-  case ND_DIV:
-    printf("  cqo\n");
-    printf("  idiv rdi\n");
-    break;
-  case ND_EQU:
-    printf("  cmp rax, rdi\n");
-    printf("  sete al\n");
-    printf("  movzx rax, al\n");
-    break;
-  case ND_NEQ:
-    printf("  cmp rax, rdi\n");
-    printf("  setne al\n");
-    printf("  movzx rax, al\n");
-    break;
-  case ND_LES:
-    printf("  cmp rax, rdi\n");
-    printf("  setl al\n");
-    printf("  movzx rax, al\n");
-    break;
-  case ND_LEQ:
-    printf("  cmp rax, rdi\n");
-    printf("  setle al\n");
-    printf("  movzx rax, al\n");
-    break;
-  case ND_INT:
-    fprintf(stderr, "fatal error");
-    exit(1);
-  }
-  printf("  push rax\n");
-}
-
-int main(int argc, char **argv) {
-  if (argc != 2) {
-    fprintf(stderr, "wrong number of arguments: expected 2, got %d\n", argc);
-    return 1;
-  }
-
-  printf(".intel_syntax noprefix\n");
-  printf(".globl _main\n");
-
-  INPUT_HEAD = argv[1];
-  CUR_TOKEN = tokenize(INPUT_HEAD);
-
-  printf("_main:\n");
-  Node *node = expr();
-  print_node(node, true);
-  gen(node);
-  printf("  pop rax\n");
-  printf("  ret\n");
-  return 0;
 }

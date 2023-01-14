@@ -1,10 +1,16 @@
-.PHONY: all clean
-TARGET = 9cc
-CFLAGS += -Wall -Wpedantic -Wextra
+CFLAGS += -Wall -Wpedantic -Wextra -std=c11 -g -static
+SRCS=$(wildcard *.c)
+OBJS=$(SRCS:.c=.o)
 
-all: $(TARGET)
+9cc: $(OBJS)
+		$(CC) -o 9cc $(OBJS) $(LDFLAGS)
+
+$(OBJS): 9cc.h
+
+test: 9cc
+		./test.sh
 
 clean:
-	rm -rf $(TARGET)
+		rm -f 9cc *.o *~ tmp*
 
-9cc: 9cc.c
+.PHONY: test clean
