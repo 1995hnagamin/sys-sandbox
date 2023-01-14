@@ -82,12 +82,13 @@ bool at_eof() {
 }
 
 bool is_2char_symbol(char *p) {
-  return strncmp(p, "<=", 2) == 0;
+  return strncmp(p, "<=", 2) == 0 || strncmp(p, ">=", 2) == 0;
 }
 
 bool is_symbol(char c) {
   return c == '+' || c == '-'
     || c == '*' || c == '/'
+    || c == '<' || c == '>'
     || c == '(' || c == ')';
 }
 
@@ -127,6 +128,7 @@ typedef enum {
   ND_SUB, // -
   ND_MUL, // *
   ND_DIV, // /
+  ND_LES, // <
   ND_LEQ, // <=
   ND_INT, // integers
 } NodeKind;
@@ -170,6 +172,9 @@ void print_node(Node *node, bool nl) {
   case ND_DIV:
     fprintf(stderr, "/");
     break;
+  case ND_LES:
+    fprintf(stderr, "<");
+    break;
   case ND_LEQ:
     fprintf(stderr, "<=");
     break;
@@ -209,6 +214,12 @@ Node *rational() {
   for (;;) {
     if (consume("<=")) {
       node = new_node(ND_LEQ, node, add());
+    } else if (consume("<")) {
+      node = new_node(ND_LES, node, add());
+    } else if (consume(">=")) {
+      node = new_node(ND_LES, add(), node);
+    } else if (consume(">")) {
+      node = new_node(ND_LEQ, add(), node);
     } else {
       return node;
     }
@@ -283,6 +294,11 @@ void gen(Node *node) {
   case ND_DIV:
     printf("  cqo\n");
     printf("  idiv rdi\n");
+    break;
+  case ND_LES:
+    printf("  cmp rax, rdi\n");
+    printf("  setl al\n");
+    printf("  movzx rax, al\n");
     break;
   case ND_LEQ:
     printf("  cmp rax, rdi\n");

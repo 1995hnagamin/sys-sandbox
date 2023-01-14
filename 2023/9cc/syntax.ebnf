@@ -1,6 +1,6 @@
 expr = rational;
 
-relational = add ("<=" add)*;
+relational = add ("<=" add | ">=" add | "<" add | ">" add)*;
 
 add = mul ("+" mul | "-" mul)*;
 

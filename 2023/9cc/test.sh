@@ -30,5 +30,10 @@ assert 4 '(3+5)/2'
 assert 7 '3+12 /3'
 assert 12 '-3*2+3*(-(1+3)*(+2)+14)'
 assert 1 '-1+4 <= 3*(+5)-(3*2)'
+assert 1 '10<=5+5'
+assert 0 '2>=4'
+assert 1 '3<4'
+assert 0 '10<10'
+assert 0 '0>16'
 
 echo OK
