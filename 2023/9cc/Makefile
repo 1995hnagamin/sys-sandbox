@@ -1,5 +1,6 @@
 .PHONY: all clean
 TARGET = 9cc
+CFLAGS += -Wall -Wpedantic -Wextra
 
 all: $(TARGET)
 
