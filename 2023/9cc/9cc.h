@@ -41,6 +41,9 @@ typedef struct Node Node;
 extern Token *CUR_TOKEN;
 extern char *INPUT_HEAD;
 
+void error(char *fmt, ...);
+void error_at(char *loc, char *fmt, ...);
+
 Token *tokenize(char *p);
 
 Node *expr();
