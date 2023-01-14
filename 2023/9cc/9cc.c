@@ -49,7 +49,7 @@ void error_at(char *loc, char *fmt, ...) {
 
 bool is_operator(char *op, Token *token) {
   return token->kind == TK_RESERVED
-    && ((int)strlen(op)) == token->len 
+    && ((int)strlen(op)) == token->len
     && memcmp(token->str, op, token->len) == 0;
 }
 
@@ -81,7 +81,11 @@ bool at_eof() {
   return CUR_TOKEN->kind == TK_EOF;
 }
 
-bool issymbol(char c) {
+bool is_2char_symbol(char *p) {
+  return strncmp(p, "<=", 2) == 0;
+}
+
+bool is_symbol(char c) {
   return c == '+' || c == '-'
     || c == '*' || c == '/'
     || c == '(' || c == ')';
@@ -96,7 +100,13 @@ Token *tokenize(char *p) {
       p++;
       continue;
     }
-    if (issymbol(*p)) {
+    if (is_2char_symbol(p)) {
+      cur = new_token(TK_RESERVED, cur, p);
+      cur->len = 2;
+      p += 2;
+      continue;;
+    }
+    if (is_symbol(*p)) {
       cur = new_token(TK_RESERVED, cur, p++);
       cur->len = 1;
       continue;
@@ -117,6 +127,7 @@ typedef enum {
   ND_SUB, // -
   ND_MUL, // *
   ND_DIV, // /
+  ND_LEQ, // <=
   ND_INT, // integers
 } NodeKind;
 
@@ -159,6 +170,9 @@ void print_node(Node *node, bool nl) {
   case ND_DIV:
     fprintf(stderr, "/");
     break;
+  case ND_LEQ:
+    fprintf(stderr, "<=");
+    break;
   default:
     fprintf(stderr, "fatal error");
     exit(1);
@@ -180,11 +194,28 @@ Node *new_node_num(int val) {
   return node;
 }
 
+Node *add();
+Node *rational();
 Node *mul();
 Node *unary();
 Node *primary();
 
 Node *expr() {
+  return rational();
+}
+
+Node *rational() {
+  Node *node = add();
+  for (;;) {
+    if (consume("<=")) {
+      node = new_node(ND_LEQ, node, add());
+    } else {
+      return node;
+    }
+  }
+}
+
+Node *add() {
   Node *node = mul();
   for (;;) {
     if (consume("+")) {
@@ -252,6 +283,11 @@ void gen(Node *node) {
   case ND_DIV:
     printf("  cqo\n");
     printf("  idiv rdi\n");
+    break;
+  case ND_LEQ:
+    printf("  cmp rax, rdi\n");
+    printf("  setle al\n");
+    printf("  movzx rax, al\n");
     break;
   case ND_INT:
     fprintf(stderr, "fatal error");
