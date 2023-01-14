@@ -71,6 +71,10 @@ Token *tokenize(char *p) {
   head.next = NULL;
   Token *cur = &head;
   while (*p) {
+    if (isspace(*p)) {
+      p++;
+      continue;
+    }
     if (*p == '+' || *p == '-') {
       cur = new_token(TK_RESERVED, cur, p++);
       continue;
