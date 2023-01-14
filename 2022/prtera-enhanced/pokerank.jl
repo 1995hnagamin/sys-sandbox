@@ -86,15 +86,19 @@ const TYPE_ABBREVS = [
 ]
 const NTYPES = length(TYPE_ABBREVS)
 
-Ma = Matrix{Float64}(undef, NTYPES, NTYPES)
-for i = 1:NTYPES
-    ti = ALTYIDX[TYPE_ABBREVS[i]]
-    for j = 1:NTYPES
-        tj = ALTYIDX[TYPE_ABBREVS[j]]
-        Ma[i, j] = TYPE_CHART[ti, tj]
+function make_matrix(abbrevs)
+    n = length(abbrevs)
+    M = Matrix{Float64}(undef, n, n)
+    for i = 1:n
+        ti = ALTYIDX[TYPE_ABBREVS[i]]
+        for j = 1:n
+            tj = ALTYIDX[TYPE_ABBREVS[j]]
+            M[i, j] = TYPE_CHART[ti, tj]
+        end
     end
+    M
 end
-const M = Ma
+const M = make_matrix(TYPE_ABBREVS)
 
 # effectiveness of a move of type tm
 eff(tm::Int64, (ty1, ty2)::Tuple{Int64,Int64}) = M[tm, ty1] * M[tm, ty2]
@@ -108,14 +112,16 @@ teff(tm::Int64, (t1, t2, tx)::Tuple{Int64,Int64,Int64}) = isvalid(tx) ? eff(tm, 
 
 sz = NTYPES * (NTYPES-1) ÷ 2 * NTYPES
 
-CTYIDXa = Array{Int64}(undef, NTYPES, NTYPES, NTYPES)
-CTYREVa = Vector{Tuple{Int64,Int64,Int64}}(undef, sz)
-for (i, ((t1, t2), tx)) in enumerate(IterTools.product(IterTools.subsets(1:NTYPES, Val{2}()), 1:NTYPES))
-    CTYIDXa[t1, t2, tx] = i
-    CTYREVa[i] = (t1, t2, tx)
+function make_ctyidx(n)
+    ctyidx = Array{Int64}(undef, n, n, n)
+    ctyrev = Vector{Tuple{Int64,Int64,Int64}}(undef, sz)
+    for (i, ((t1, t2), tx)) in enumerate(IterTools.product(IterTools.subsets(1:n, Val{2}()), 1:n))
+        ctyidx[t1, t2, tx] = i
+        ctyrev[i] = (t1, t2, tx)
+    end
+    (ctyidx, ctyrev)
 end
-const CTYIDX = CTYIDXa
-const CTYREV = CTYREVa
+const CTYIDX, CTYREV = make_ctyidx(NTYPES)
 
 function select(expect::Vector{Float64}, sty::Tuple{Int64,Int64,Int64}, (t1, t2)::Tuple{Int64,Int64})
     (s1, s2, sx) = sty
@@ -156,18 +162,16 @@ for iter = 1:300
             tty = CTYREV[j]
             (t1, t2, tx) = tty
             si = select(expect, sty, (t1, t2))
-            sstab = ((si == s1 || si == s2) && si == sx) ? 2.0 : 1.5
             ti = select(expect, tty, (s1, s2))
-            tstab = ((ti == t1 || ti == t2) && ti == tx) ? 2.0 : 1.5
-            wst = max(1.5/8, teff(si, tty)*sstab)
-            wts = max(1.5/8, teff(ti, sty)*tstab)
+            wst = max(1.5/8, teff(si, tty)*stab(si, sx))
+            wts = max(1.5/8, teff(ti, sty)*stab(ti, tx))
             weight = log(2, wts/wst)
             if weight > 0
                 A[i, j] = weight
             end
         end
     end
-    for i = 1:sz
+    @time for i = 1:sz
         tot = sum(A[i,:])
         A[i, :] /= tot
     end
