@@ -75,7 +75,9 @@ bool at_eof() {
 }
 
 bool issymbol(char c) {
-  return c == '+' || c == '-' || c == '(' || c == ')';
+  return c == '+' || c == '-'
+    || c == '*'
+    || c == '(' || c == ')';
 }
 
 Token *tokenize(char *p) {
@@ -105,6 +107,7 @@ Token *tokenize(char *p) {
 typedef enum {
   ND_ADD, // +
   ND_SUB, // -
+  ND_MUL, // *
   ND_INT, // integers
 } NodeKind;
 
@@ -141,6 +144,9 @@ void print_node(Node *node, bool nl) {
   case ND_SUB:
     fprintf(stderr, "-");
     break;
+  case ND_MUL:
+    fprintf(stderr, "*");
+    break;
   default:
     fprintf(stderr, "fatal error");
     exit(1);
@@ -162,15 +168,28 @@ Node *new_node_num(int val) {
   return node;
 }
 
+Node *mul();
 Node *primary();
 
 Node *expr() {
-  Node *node = primary();
+  Node *node = mul();
   for (;;) {
     if (consume('+')) {
-      node = new_node(ND_ADD, node, primary());
+      node = new_node(ND_ADD, node, mul());
     } else if (consume('-')) {
-      node = new_node(ND_SUB, node, primary());
+      node = new_node(ND_SUB, node, mul());
+    } else {
+      return node;
+    }
+  }
+}
+
+Node *mul() {
+  Node *node = primary();
+
+  for (;;) {
+    if (consume('*')) {
+      node = new_node(ND_MUL, node, primary());
     } else {
       return node;
     }
@@ -202,6 +221,9 @@ void gen(Node *node) {
     break;
   case ND_SUB:
     printf("  sub rax, rdi\n");
+    break;
+  case ND_MUL:
+    printf("  imul rax, rdi\n");
     break;
   case ND_INT:
     fprintf(stderr, "fatal error");
