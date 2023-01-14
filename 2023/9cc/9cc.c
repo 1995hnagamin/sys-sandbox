@@ -98,6 +98,28 @@ Token *tokenize(char *p) {
   return head.next;
 }
 
+typedef enum {
+  ND_ADD, // +
+  ND_SUB, // -
+  ND_INT, // integers
+} NodeKind;
+
+struct Node {
+  NodeKind kind;
+  struct Node *lhs;
+  struct Node *rhs;
+  int val;
+};
+
+typedef struct Node Node;
+
+Node *new_node(NodeKind kind, Node *lhs, Node *rhs) {
+  Node *node = calloc(1, sizeof(Node));
+  node->kind = kind;
+  node->lhs = lhs;
+  node->rhs = rhs;
+  return node;
+}
 int main(int argc, char **argv) {
   if (argc != 2) {
     fprintf(stderr, "wrong number of arguments: expected 2, got %d\n", argc);
