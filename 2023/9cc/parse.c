@@ -218,6 +218,7 @@ void view_node(Node *node, bool nl) {
     view_node(node->lhs, false);
     fprintf(stderr, " ");
     view_node(node->rhs->lhs, false);
+    fprintf(stderr, " ");
     view_node(node->rhs->rhs, false);
     fprintf(stderr, ")");
     if (nl) {

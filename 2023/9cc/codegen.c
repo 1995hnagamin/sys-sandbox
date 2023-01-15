@@ -18,14 +18,22 @@ int gensym() {
 }
 
 void gen_if_stmt(Node *node) {
-  int else_label = gensym();
   int end_label = gensym();
   gen(node->lhs);
   printf("  pop rax\n");
   printf("  cmp rax, 0\n");
-  printf("  je .Lend%d\n", end_label);
-  gen(node->rhs->lhs);
-  printf(".Lend%d:\n", end_label);
+  if (node->rhs->rhs) {
+    int else_label = gensym();
+    printf("  je .LElse%d\n", else_label);
+    gen(node->rhs->lhs); // then
+    printf("  jmp .LEnd%d\n", end_label);
+    printf(".LElse%d:\n", else_label);
+    gen(node->rhs->rhs); // else
+  } else {
+    printf("  je .LEnd%d\n", end_label);
+    gen(node->rhs->lhs); // then
+  }
+  printf(".LEnd%d:\n", end_label);
   return;
 }
 

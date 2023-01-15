@@ -44,5 +44,8 @@ assert 0 '5>5;'
 assert 20 'a = 3; a = 3 + 7; b = (1+7)/(1+3); a * b;'
 assert 8 'aaaa = 3; aaab = 5; aaaa+aaab;'
 assert 7 'a = 4; b = 10; return (a + b)/2; return a;'
+assert 15 'if (1 >= 0) return 15; return 20;'
+assert 29 'if (98 > 97) 29; else 31;'
+assert 31 'if (97 > 98) 29; else 31;'
 
 echo OK
