@@ -195,35 +195,26 @@ Node *new_node(NodeKind kind, Node *lhs, Node *rhs) {
   return node;
 }
 
-void view_node(Node *node, bool nl) {
+void view_node(Node *node) {
   if (!node) {
     return;
   }
   if (node->kind == ND_INT) {
     fprintf(stderr, "%d", node->val);
-    if (nl) {
-      fprintf(stderr, "\n");
-    }
     return;
   }
   if (node->kind == ND_LVAR) {
     fprintf(stderr, "[%d]", node->offset);
-    if (nl) {
-      fprintf(stderr, "\n");
-    }
     return;
   }
   if (node->kind == ND_IF) {
     fprintf(stderr, "(if ");
-    view_node(node->lhs, false);
+    view_node(node->lhs);
     fprintf(stderr, " ");
-    view_node(node->rhs->lhs, false);
+    view_node(node->rhs->lhs);
     fprintf(stderr, " ");
-    view_node(node->rhs->rhs, false);
+    view_node(node->rhs->rhs);
     fprintf(stderr, ")");
-    if (nl) {
-      fprintf(stderr, "\n");
-    }
     return;
   }
   fprintf(stderr, "(");
@@ -263,13 +254,10 @@ void view_node(Node *node, bool nl) {
     exit(1);
   }
   fprintf(stderr, " ");
-  view_node(node->lhs, false);
+  view_node(node->lhs);
   fprintf(stderr, " ");
-  view_node(node->rhs, false);
+  view_node(node->rhs);
   fprintf(stderr, ")");
-  if (nl) {
-    fprintf(stderr, "\n");
-  }
 }
 
 Node *new_node_ident(int offset) {

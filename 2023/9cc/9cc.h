@@ -68,7 +68,7 @@ extern LVar *LOCAL_VARS;
 extern Node *code[100];
 void parse();
 
-void view_node(Node *node, bool nl);
+void view_node(Node *node);
 
 void gen(Node *node);
 
