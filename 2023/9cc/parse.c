@@ -372,9 +372,9 @@ Node *relational() {
     } else if (consume("<")) {
       node = new_node(ND_LES, node, add());
     } else if (consume(">=")) {
-      node = new_node(ND_LES, add(), node);
-    } else if (consume(">")) {
       node = new_node(ND_LEQ, add(), node);
+    } else if (consume(">")) {
+      node = new_node(ND_LES, add(), node);
     } else {
       return node;
     }
