@@ -42,6 +42,14 @@ struct Node {
 
 typedef struct Node Node;
 
+struct LVar {
+  struct LVar *next;
+  char *name;
+  int len;
+  int offset;
+};
+typedef struct LVar LVar;
+
 extern Token *CUR_TOKEN;
 extern char *INPUT_HEAD;
 
@@ -50,6 +58,7 @@ void error_at(char *loc, char *fmt, ...);
 
 Token *tokenize(char *p);
 
+extern LVar *LOCAL_VARS;
 extern Node *code[100];
 void parse();
 

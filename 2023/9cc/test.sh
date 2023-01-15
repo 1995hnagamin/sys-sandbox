@@ -40,5 +40,6 @@ assert 1 '3<4;'
 assert 0 '10<10;'
 assert 0 '0>16;'
 assert 20 'a = 3 + 7; b = (1+7)/(1+3); a * b;'
+assert 8 'aaaa = 3; aaab = 5; aaaa+aaab;'
 
 echo OK

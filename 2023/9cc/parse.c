@@ -98,6 +98,26 @@ bool is_symbol(char c) {
     || c == ';';
 }
 
+LVar *LOCAL_VARS;
+LVar *find_lvar(Token *tok) {
+  int len = tok->len;
+  for (LVar *var = LOCAL_VARS; var; var = var->next) {
+    if (var->len == len && !memcmp(tok->str, var->name, len)) {
+      return var;
+    }
+  }
+  return NULL;
+}
+
+LVar *new_lvar(struct LVar *next, char *name, int len, int offset) {
+  LVar *lvar = calloc(1, sizeof(LVar));
+  lvar->next = next;
+  lvar->name = name;
+  lvar->len = len;
+  lvar->offset = offset;
+  return lvar;
+}
+
 Token *tokenize(char *p) {
   Token head;
   head.next = NULL;
@@ -119,8 +139,10 @@ Token *tokenize(char *p) {
       continue;
     }
     if ('a' <= *p && *p <= 'z') {
-        cur = new_token(TK_IDENT, cur, p++);
-        cur->len = 1;
+        cur = new_token(TK_IDENT, cur, p);
+        char *start = p++;
+        while ('a' <= *p && *p <= 'z') { ++p; }
+        cur->len = p - start;
         continue;
     }
     if (isdigit(*p)) {
@@ -226,6 +248,7 @@ Node *unary();
 Node *primary();
 
 void parse() {
+  LOCAL_VARS = new_lvar(NULL, "", 0, 0);
   program();
 }
 
@@ -330,7 +353,14 @@ Node *primary() {
   }
   Token *tok = consume_ident();
   if (tok) {
-    return new_node_ident((tok->str[0] - 'a' + 1)*8);
+    LVar *lvar = find_lvar(tok);
+    if (lvar) {
+      return new_node_ident(lvar->offset);
+    }
+    // make a new variable
+    lvar = new_lvar(LOCAL_VARS, tok->str, tok->len, LOCAL_VARS->offset+8);
+    LOCAL_VARS = lvar;
+    return new_node_ident(lvar->offset);
   }
   return new_node_num(expect_number());
 }
