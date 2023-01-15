@@ -140,7 +140,7 @@ void gen(Node *node) {
     printf("  push rax\n");
     break;
   case ND_INVALID:
-    fprintf(stderr, "fatal error");
+    fprintf(stderr, "fatal error in gen()\n");
     exit(1);
   }
 }

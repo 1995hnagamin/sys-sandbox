@@ -250,7 +250,7 @@ void view_node(Node *node) {
     fprintf(stderr, "<=");
     break;
   default:
-    fprintf(stderr, "fatal error");
+    fprintf(stderr, "fatal error in view_node()\n");
     exit(1);
   }
   fprintf(stderr, " ");
