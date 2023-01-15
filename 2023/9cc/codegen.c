@@ -66,57 +66,81 @@ void gen(Node *node) {
     printf("  pop rbp\n");
     printf("  ret\n");
     return;
-  default:
-    ; // do nothing
-  }
-
-  gen(node->lhs);
-  gen(node->rhs);
-
-  printf("  pop rdi\n");
-  printf("  pop rax\n");
-  switch (node->kind) {
   case ND_ADD:
+    gen(node->lhs);
+    gen(node->rhs);
+    printf("  pop rdi\n");
+    printf("  pop rax\n");
     printf("  add rax, rdi\n");
+    printf("  push rax\n");
     break;
   case ND_SUB:
+    gen(node->lhs);
+    gen(node->rhs);
+    printf("  pop rdi\n");
+    printf("  pop rax\n");
     printf("  sub rax, rdi\n");
+    printf("  push rax\n");
     break;
   case ND_MUL:
+    gen(node->lhs);
+    gen(node->rhs);
+    printf("  pop rdi\n");
+    printf("  pop rax\n");
     printf("  imul rax, rdi\n");
+    printf("  push rax\n");
     break;
   case ND_DIV:
+    gen(node->lhs);
+    gen(node->rhs);
+    printf("  pop rdi\n");
+    printf("  pop rax\n");
     printf("  cqo\n");
     printf("  idiv rdi\n");
+    printf("  push rax\n");
     break;
   case ND_EQU:
+    gen(node->lhs);
+    gen(node->rhs);
+    printf("  pop rdi\n");
+    printf("  pop rax\n");
     printf("  cmp rax, rdi\n");
     printf("  sete al\n");
     printf("  movzx rax, al\n");
+    printf("  push rax\n");
     break;
   case ND_NEQ:
+    gen(node->lhs);
+    gen(node->rhs);
+    printf("  pop rdi\n");
+    printf("  pop rax\n");
     printf("  cmp rax, rdi\n");
     printf("  setne al\n");
     printf("  movzx rax, al\n");
+    printf("  push rax\n");
     break;
   case ND_LES:
+    gen(node->lhs);
+    gen(node->rhs);
+    printf("  pop rdi\n");
+    printf("  pop rax\n");
     printf("  cmp rax, rdi\n");
     printf("  setl al\n");
     printf("  movzx rax, al\n");
+    printf("  push rax\n");
     break;
   case ND_LEQ:
+    gen(node->lhs);
+    gen(node->rhs);
+    printf("  pop rdi\n");
+    printf("  pop rax\n");
     printf("  cmp rax, rdi\n");
     printf("  setle al\n");
     printf("  movzx rax, al\n");
+    printf("  push rax\n");
     break;
   case ND_INVALID:
-  case ND_IF:
-  case ND_INT:
-  case ND_LVAR:
-  case ND_ASSIGN:
-  case ND_RETURN:
     fprintf(stderr, "fatal error");
     exit(1);
   }
-  printf("  push rax\n");
 }
