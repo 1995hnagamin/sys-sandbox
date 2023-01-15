@@ -12,6 +12,23 @@ void get_lval(Node *node) {
   printf("  push rax\n");
 }
 
+int GENSYM_IDX;
+int gensym() {
+  return ++GENSYM_IDX;
+}
+
+void gen_if_stmt(Node *node) {
+  int else_label = gensym();
+  int end_label = gensym();
+  gen(node->lhs);
+  printf("  pop rax\n");
+  printf("  cmp rax, 0\n");
+  printf("  je .Lend%d\n", end_label);
+  gen(node->rhs->lhs);
+  printf(".Lend%d:\n", end_label);
+  return;
+}
+
 void gen(Node *node) {
   switch (node->kind) {
   case ND_INT:
@@ -22,6 +39,9 @@ void gen(Node *node) {
     printf("  pop rax\n");
     printf("  mov rax, [rax]\n");
     printf("  push rax\n");
+    return;
+  case ND_IF:
+    gen_if_stmt(node);
     return;
   case ND_ASSIGN:
     get_lval(node->lhs);
@@ -81,6 +101,8 @@ void gen(Node *node) {
     printf("  setle al\n");
     printf("  movzx rax, al\n");
     break;
+  case ND_INVALID:
+  case ND_IF:
   case ND_INT:
   case ND_LVAR:
   case ND_ASSIGN:

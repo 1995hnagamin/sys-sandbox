@@ -142,6 +142,16 @@ Token *tokenize(char *p) {
       p++;
       continue;
     }
+    if (strncmp("if", p, 2) == 0 && !is_alnum(p[2])) {
+      cur = new_token(TK_IF, cur, p);
+      p += 2;
+      continue;
+    }
+    if (strncmp("else", p, 4) == 0 && !is_alnum(p[4])) {
+      cur = new_token(TK_ELSE, cur, p);
+      p += 4;
+      continue;
+    }
     // if p starts with "return", p[6] should be exist
     if (strncmp("return", p, 6) == 0 && !is_alnum(p[6])) {
       cur = new_token(TK_RETURN, cur, p);
@@ -198,6 +208,18 @@ void view_node(Node *node, bool nl) {
   }
   if (node->kind == ND_LVAR) {
     fprintf(stderr, "[%d]", node->offset);
+    if (nl) {
+      fprintf(stderr, "\n");
+    }
+    return;
+  }
+  if (node->kind == ND_IF) {
+    fprintf(stderr, "(if ");
+    view_node(node->lhs, false);
+    fprintf(stderr, " ");
+    view_node(node->rhs->lhs, false);
+    view_node(node->rhs->rhs, false);
+    fprintf(stderr, ")");
     if (nl) {
       fprintf(stderr, "\n");
     }
@@ -289,6 +311,23 @@ void program() {
 }
 
 Node *stmt() {
+  if (consume_tk(TK_IF)) {
+    expect("(");
+    Node *cond = expr();
+    expect(")");
+    Node *then = stmt();
+    /*
+       *-------*------[els of NULL]
+       |       |
+      [cond]  [then]
+    */
+    Node *nif = new_node(ND_IF, cond, new_node(ND_INVALID, then, NULL));
+    if (consume_tk(TK_ELSE)) {
+      Node *els = stmt();
+      nif->rhs->rhs = els;
+    }
+    return nif;
+  }
   Node *node;
   if (consume_tk(TK_RETURN)) {
     Node *e = expr();

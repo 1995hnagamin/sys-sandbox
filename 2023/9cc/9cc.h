@@ -2,6 +2,8 @@
 #define IXCC_H
 
 typedef enum {
+  TK_IF,
+  TK_ELSE,
   TK_RETURN,
   TK_RESERVED,
   TK_IDENT,
@@ -20,6 +22,8 @@ struct Token {
 typedef struct Token Token;
 
 typedef enum {
+  ND_INVALID,
+  ND_IF,
   ND_RETURN,
   ND_ASSIGN, // assignments
   ND_ADD, // +
