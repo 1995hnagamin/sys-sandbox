@@ -36,6 +36,7 @@ typedef enum {
   ND_LEQ, // <=
   ND_INT, // integers
   ND_LVAR, // local variables
+  ND_BLOCK, // compound statements
 } NodeKind;
 
 struct Node {

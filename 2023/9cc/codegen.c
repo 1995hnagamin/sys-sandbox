@@ -66,6 +66,12 @@ void gen(Node *node) {
     printf("  pop rbp\n");
     printf("  ret\n");
     return;
+  case ND_BLOCK:
+    for (Node *s = node->rhs; s; s = s->rhs) {
+      gen(s->lhs);
+      printf("  pop rax\n");
+    }
+    return;
   case ND_ADD:
     gen(node->lhs);
     gen(node->rhs);

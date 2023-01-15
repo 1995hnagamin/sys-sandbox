@@ -109,6 +109,7 @@ bool is_symbol(char c) {
     || c == '*' || c == '/'
     || c == '<' || c == '>'
     || c == '(' || c == ')'
+    || c == '{' || c == '}'
     || c == '='
     || c == ';';
 }
@@ -217,6 +218,15 @@ void view_node(Node *node) {
     fprintf(stderr, ")");
     return;
   }
+  if (node->kind == ND_BLOCK) {
+    fprintf(stderr, "(block");
+    for (Node *s = node->rhs; s; s = s->rhs) {
+      fprintf(stderr, " ");
+      view_node(s->lhs);
+    }
+    fprintf(stderr, ")");
+    return;
+  }
   fprintf(stderr, "(");
   switch (node->kind) {
   case ND_RETURN:
@@ -318,6 +328,16 @@ Node *stmt() {
     return nif;
   }
   Node *node;
+  if (consume("{")) {
+    node = new_node(ND_BLOCK, NULL, NULL);
+    Node *cur = node;
+    while (!consume("}")) {
+      Node *s = stmt();
+      cur->rhs = new_node(ND_INVALID, s, NULL);
+      cur = cur->rhs;
+    }
+    return node;
+  }
   if (consume_tk(TK_RETURN)) {
     Node *e = expr();
     node = new_node(ND_RETURN, e, NULL);
