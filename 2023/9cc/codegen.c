@@ -31,6 +31,13 @@ void gen(Node *node) {
     printf("  mov [rax], rdi\n");
     printf("  push rdi\n");
     return;
+  case ND_RETURN:
+    gen(node->lhs);
+    printf("  pop rax\n");
+    printf("  mov rsp, rbp\n");
+    printf("  pop rbp\n");
+    printf("  ret\n");
+    return;
   default:
     ; // do nothing
   }
@@ -77,6 +84,7 @@ void gen(Node *node) {
   case ND_INT:
   case ND_LVAR:
   case ND_ASSIGN:
+  case ND_RETURN:
     fprintf(stderr, "fatal error");
     exit(1);
   }

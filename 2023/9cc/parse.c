@@ -41,6 +41,13 @@ void error_at(char *loc, char *fmt, ...) {
   exit(1);
 }
 
+int is_alnum(char c) {
+  return ('a' <= c && c <= 'z')
+    || ('A' <= c && c <= 'Z')
+    || ('0' <= c && c <= '9')
+    || (c == '_');
+}
+
 bool is_operator(char *op, Token *token) {
   return token->kind == TK_RESERVED
     && ((int)strlen(op)) == token->len
@@ -62,6 +69,14 @@ Token *consume_ident() {
   }
   CUR_TOKEN = CUR_TOKEN->next;
   return ident;
+}
+
+bool consume_tk(TokenKind tk) {
+  if (CUR_TOKEN->kind != tk) {
+    return false;
+  }
+  CUR_TOKEN = CUR_TOKEN->next;
+  return true;
 }
 
 void expect(char *op) {
@@ -127,6 +142,12 @@ Token *tokenize(char *p) {
       p++;
       continue;
     }
+    // if p starts with "return", p[6] should be exist
+    if (strncmp("return", p, 6) == 0 && !is_alnum(p[6])) {
+      cur = new_token(TK_RETURN, cur, p);
+      p += 6;
+      continue;
+    }
     if (is_2char_symbol(p)) {
       cur = new_token(TK_RESERVED, cur, p);
       cur->len = 2;
@@ -165,6 +186,9 @@ Node *new_node(NodeKind kind, Node *lhs, Node *rhs) {
 }
 
 void view_node(Node *node, bool nl) {
+  if (!node) {
+    return;
+  }
   if (node->kind == ND_INT) {
     fprintf(stderr, "%d", node->val);
     if (nl) {
@@ -181,6 +205,9 @@ void view_node(Node *node, bool nl) {
   }
   fprintf(stderr, "(");
   switch (node->kind) {
+  case ND_RETURN:
+    fprintf(stderr, "return");
+    break;
   case ND_ASSIGN:
     fprintf(stderr, "=");
     break;
@@ -262,7 +289,13 @@ void program() {
 }
 
 Node *stmt() {
-  Node *node = expr();
+  Node *node;
+  if (consume_tk(TK_RETURN)) {
+    Node *e = expr();
+    node = new_node(ND_RETURN, e, NULL);
+  } else {
+    node = expr();
+  }
   expect(";");
   return node;
 }

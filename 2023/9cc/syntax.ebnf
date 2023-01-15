@@ -1,6 +1,7 @@
 program = stmt*;
 
-stmt = expr ";";
+stmt = expr ";"
+     | "return" expr ";";
 
 expr = assign;
 
@@ -16,4 +17,6 @@ mul = unary ("*" unary | "/" unary)*;
 
 unary = ("+" | "-")? primary;
 
-primary = num | ident | "(" expr ")";
+primary = num
+        | ident
+        | "(" expr ")";
