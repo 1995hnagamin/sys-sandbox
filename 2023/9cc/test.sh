@@ -50,5 +50,8 @@ assert 31 'main() { if (97 > 98) return 29; else return 31; }'
 assert  4 'main() { a = 1; if (10>9) {b = 3; a = a + b;} return a; }'
 assert 10 'main() { a=10; foo(); return a; }'
 assert 22 'main() { a=12; b=34; bar(a, b); return b-a; }'
+#assert 10 'f(x) { if (5>x) return 10; foo(); return f(x-1); } main() { return f(10); }'
+assert 91 'mc(n) { if (n > 100) return n-10; else mc(mc(n+11)); } main() { return mc(99); }'
+assert 13 'fib(n) { if (n < 2) return 1; else fib(n-1)+fib(n-2); } main() { return fib(6); }'
 
 echo OK

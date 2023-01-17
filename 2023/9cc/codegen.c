@@ -37,27 +37,39 @@ void gen_if_stmt(Node *node) {
   return;
 }
 
+char *REG_NAMES[6] = {"rdi", "rsi", "rdx", "rcx", "r8d", "r9d"};
+
+void gen_fn_def(Node *def) {
+  printf("_%.*s:\n", def->tok->len, def->tok->str);
+  printf("  push rbp\n");
+  printf("  mov rbp, rsp\n");
+  printf("  sub rsp, 208\n");
+  int i = 0;
+  for (Node *param = def->rhs; param; param = param->rhs) {
+    printf("  mov rax, rbp\n");
+    printf("  sub rax, %d\n", param->lhs->offset);
+    printf("  mov [rax], %s\n", REG_NAMES[i++]);
+  }
+  gen(def->lhs); // function body
+  printf("  mov rsp, rbp\n");
+  printf("  pop rbp\n");
+  printf("  ret\n");
+}
+
 void gen_fn_call(Node *call) {
-  char *reg[6] = {"rdi", "rsi", "rdx", "rcx", "r8d", "r9d"};
   Node *arg = call->rhs;
   for (int i = 0; i < 6 && arg; ++i, arg = arg->rhs) {
     gen(arg->lhs);
-    printf("  pop %s\n", reg[i]);
+    printf("  pop %s\n", REG_NAMES[i]);
   }
   printf("  call _%.*s\n", call->tok->len, call->tok->str);
+  printf("  push rax\n");
 }
 
 void gen(Node *node) {
   switch (node->kind) {
   case ND_FNDEF:
-    printf("_%.*s:\n", node->tok->len, node->tok->str);
-    printf("  push rbp\n");
-    printf("  mov rbp, rsp\n");
-    printf("  sub rsp, 208\n");
-    gen(node->lhs); // function body
-    printf("  mov rsp, rbp\n");
-    printf("  pop rbp\n");
-    printf("  ret\n");
+    gen_fn_def(node);
     return;
   case ND_INT:
     printf("  push %d          # integer\n", node->val);
