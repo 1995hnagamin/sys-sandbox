@@ -37,6 +37,16 @@ void gen_if_stmt(Node *node) {
   return;
 }
 
+void gen_fn_call(Node *call) {
+  char *reg[6] = {"rdi", "rsi", "rdx", "rcx", "r8d", "r9d"};
+  Node *arg = call->rhs;
+  for (int i = 0; i < 6 && arg; ++i, arg = arg->rhs) {
+    gen(arg->lhs);
+    printf("  pop %s\n", reg[i]);
+  }
+  printf("  call _%.*s\n", call->tok->len, call->tok->str);
+}
+
 void gen(Node *node) {
   switch (node->kind) {
   case ND_INT:
@@ -60,7 +70,7 @@ void gen(Node *node) {
     printf("  push rdi\n");
     return;
   case ND_FCALL:
-    printf("  call _%.*s\n", node->tok->len, node->tok->str);
+    gen_fn_call(node);
     break;
   case ND_RETURN:
     gen(node->lhs);

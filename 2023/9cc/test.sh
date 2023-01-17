@@ -49,5 +49,6 @@ assert 29 'if (98 > 97) 29; else 31;'
 assert 31 'if (97 > 98) 29; else 31;'
 assert 4 'a = 1; if (10>9) {b = 3; a = a + b;} a;'
 assert 10 'a=10; foo(); a;'
+assert 22 'a=12; b=34; bar(a, b); b-a;'
 
 echo OK
