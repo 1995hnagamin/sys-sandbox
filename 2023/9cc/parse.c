@@ -211,8 +211,12 @@ void view_node(Node *node) {
   if (node->kind == ND_FNDEF) {
     fprintf(stderr, "(fndef ");
     fprintf(stderr, "%.*s ", node->tok->len, node->tok->str);
-    fprintf(stderr, "() ");
-    view_node(node->rhs);
+    fprintf(stderr, "(");
+    for (Node *param = node->rhs; param; param = param->rhs) {
+      view_node(param->lhs);
+    }
+    fprintf(stderr, ") ");
+    view_node(node->lhs);
     fprintf(stderr, ")");
     return;
   }
@@ -314,20 +318,30 @@ Node *unary();
 Node *primary();
 
 void parse() {
-  LOCAL_VARS = new_lvar(NULL, "", 0, 0);
   program();
 }
 
 Node *code[100];
 void program() {
-  Token *tok;
+  Token *fn_name;
   int i = 0;
-  while ((tok = consume_ident())) {
+  while ((fn_name = consume_ident())) {
+    LOCAL_VARS = new_lvar(NULL, "", 0, 0);
+    Node *def = new_node(ND_FNDEF, NULL, NULL);
+    def->tok = fn_name;
     expect("(");
-    expect(")");
+    Node *node = def;
+    while (!consume(")")) {
+      Token *name = consume_ident();
+      node->rhs = new_node(ND_INVALID, NULL, NULL);
+      node = node->rhs;
+      LVar *lvar = new_lvar(LOCAL_VARS, name->str, name->len, LOCAL_VARS->offset+8);
+      LOCAL_VARS = lvar;
+      node->lhs = new_node_ident(lvar->offset);
+      consume(",");
+    }
     Node *body = stmt();
-    Node *def = new_node(ND_FNDEF, NULL, body);
-    def->tok = tok;
+    def->lhs = body;
     code[i++] = def;
   }
   code[i] = NULL;

@@ -54,7 +54,7 @@ void gen(Node *node) {
     printf("  push rbp\n");
     printf("  mov rbp, rsp\n");
     printf("  sub rsp, 208\n");
-    gen(node->rhs); // function body
+    gen(node->lhs); // function body
     printf("  mov rsp, rbp\n");
     printf("  pop rbp\n");
     printf("  ret\n");
