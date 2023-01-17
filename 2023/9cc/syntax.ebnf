@@ -1,4 +1,6 @@
-program = stmt*;
+program = fndef*;
+
+fndef = ident "(" ")" "{" stmt* "}";
 
 stmt = expr ";"
      | "if" "(" expr ")" stmt ("else" stmt)?

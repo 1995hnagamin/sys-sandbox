@@ -208,6 +208,14 @@ void view_node(Node *node) {
     fprintf(stderr, "[%d]", node->offset);
     return;
   }
+  if (node->kind == ND_FNDEF) {
+    fprintf(stderr, "(fndef ");
+    fprintf(stderr, "%.*s ", node->tok->len, node->tok->str);
+    fprintf(stderr, "() ");
+    view_node(node->rhs);
+    fprintf(stderr, ")");
+    return;
+  }
   if (node->kind == ND_IF) {
     fprintf(stderr, "(if ");
     view_node(node->lhs);
@@ -312,9 +320,15 @@ void parse() {
 
 Node *code[100];
 void program() {
+  Token *tok;
   int i = 0;
-  while (!at_eof()) {
-    code[i++] = stmt();
+  while ((tok = consume_ident())) {
+    expect("(");
+    expect(")");
+    Node *body = stmt();
+    Node *def = new_node(ND_FNDEF, NULL, body);
+    def->tok = tok;
+    code[i++] = def;
   }
   code[i] = NULL;
 }

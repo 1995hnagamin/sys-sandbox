@@ -15,18 +15,10 @@ int main(int argc, char **argv) {
   CUR_TOKEN = tokenize(INPUT_HEAD);
   parse();
 
-  printf("_main:\n");
-  printf("  push rbp\n");
-  printf("  mov rbp, rsp\n");
-  printf("  sub rsp, 208\n");
   for (int i = 0; code[i]; ++i) {
     view_node(code[i]);
     fprintf(stderr, "\n");
     gen(code[i]);
-    printf("  pop rax\n");
   }
-  printf("  mov rsp, rbp\n");
-  printf("  pop rbp\n");
-  printf("  ret\n");
   return 0;
 }

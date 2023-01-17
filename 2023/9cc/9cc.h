@@ -23,6 +23,7 @@ typedef struct Token Token;
 
 typedef enum {
   ND_INVALID,
+  ND_FNDEF,
   ND_IF,
   ND_RETURN,
   ND_ASSIGN, // assignments

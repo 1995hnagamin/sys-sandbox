@@ -49,6 +49,16 @@ void gen_fn_call(Node *call) {
 
 void gen(Node *node) {
   switch (node->kind) {
+  case ND_FNDEF:
+    printf("_%.*s:\n", node->tok->len, node->tok->str);
+    printf("  push rbp\n");
+    printf("  mov rbp, rsp\n");
+    printf("  sub rsp, 208\n");
+    gen(node->rhs); // function body
+    printf("  mov rsp, rbp\n");
+    printf("  pop rbp\n");
+    printf("  ret\n");
+    return;
   case ND_INT:
     printf("  push %d\n", node->val);
     return;
