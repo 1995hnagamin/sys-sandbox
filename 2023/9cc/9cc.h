@@ -26,7 +26,7 @@ typedef enum {
   ND_IF,
   ND_RETURN,
   ND_ASSIGN, // assignments
-  ND_FCALL, // function call
+  ND_FNCALL, // function call
   ND_ADD, // +
   ND_SUB, // -
   ND_MUL, // *
@@ -46,7 +46,7 @@ struct Node {
   struct Node *rhs;
   int val; // valid if kind == ND_INT
   int offset; // valid if kind == ND_LVAR
-  Token *tok; // valid if kind == ND_FCALL
+  Token *tok; // valid if kind == ND_FNCALL
 };
 
 typedef struct Node Node;

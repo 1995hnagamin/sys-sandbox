@@ -218,7 +218,7 @@ void view_node(Node *node) {
     fprintf(stderr, ")");
     return;
   }
-  if (node->kind == ND_FCALL) {
+  if (node->kind == ND_FNCALL) {
     fprintf(stderr, "(call ");
     fprintf(stderr, "%.*s", node->tok->len, node->tok->str);
     for (Node *n = node->rhs; n; n = n->rhs) {
@@ -449,7 +449,7 @@ Node *primary() {
   }
   if (consume("(")) {
     // shoule be a function call
-    Node *call = new_node(ND_FCALL, NULL, NULL);
+    Node *call = new_node(ND_FNCALL, NULL, NULL);
     call->tok = tok;
     Node *node = call;
     while (!consume(")")) {

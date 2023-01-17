@@ -69,7 +69,7 @@ void gen(Node *node) {
     printf("  mov [rax], rdi\n");
     printf("  push rdi\n");
     return;
-  case ND_FCALL:
+  case ND_FNCALL:
     gen_fn_call(node);
     break;
   case ND_RETURN:
