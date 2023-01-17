@@ -48,5 +48,6 @@ assert 15 'if (1 >= 0) return 15; return 20;'
 assert 29 'if (98 > 97) 29; else 31;'
 assert 31 'if (97 > 98) 29; else 31;'
 assert 4 'a = 1; if (10>9) {b = 3; a = a + b;} a;'
+assert 10 'a=10; foo(); a;'
 
 echo OK

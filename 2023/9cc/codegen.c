@@ -59,6 +59,9 @@ void gen(Node *node) {
     printf("  mov [rax], rdi\n");
     printf("  push rdi\n");
     return;
+  case ND_FCALL:
+    printf("  call _%.*s\n", node->tok->len, node->tok->str);
+    break;
   case ND_RETURN:
     gen(node->lhs);
     printf("  pop rax\n");

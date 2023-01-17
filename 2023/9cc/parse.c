@@ -218,6 +218,12 @@ void view_node(Node *node) {
     fprintf(stderr, ")");
     return;
   }
+  if (node->kind == ND_FCALL) {
+    fprintf(stderr, "(call ");
+    fprintf(stderr, "%.*s", node->tok->len, node->tok->str);
+    fprintf(stderr, ")");
+    return;
+  }
   if (node->kind == ND_BLOCK) {
     fprintf(stderr, "(block");
     for (Node *s = node->rhs; s; s = s->rhs) {
@@ -433,15 +439,23 @@ Node *primary() {
     return node;
   }
   Token *tok = consume_ident();
-  if (tok) {
-    LVar *lvar = find_lvar(tok);
-    if (lvar) {
-      return new_node_ident(lvar->offset);
-    }
-    // make a new variable
-    lvar = new_lvar(LOCAL_VARS, tok->str, tok->len, LOCAL_VARS->offset+8);
-    LOCAL_VARS = lvar;
+  if (!tok) {
+    // should be a number
+    return new_node_num(expect_number());
+  }
+  if (consume("(")) {
+    // shoule be a function call
+    consume(")");
+    Node *node = new_node(ND_FCALL, NULL, NULL);
+    node->tok = tok;
+    return node;
+  }
+  LVar *lvar = find_lvar(tok);
+  if (lvar) {
     return new_node_ident(lvar->offset);
   }
-  return new_node_num(expect_number());
+  // make a new variable
+  lvar = new_lvar(LOCAL_VARS, tok->str, tok->len, LOCAL_VARS->offset+8);
+  LOCAL_VARS = lvar;
+  return new_node_ident(lvar->offset);
 }

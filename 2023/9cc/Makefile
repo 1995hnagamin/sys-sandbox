@@ -11,7 +11,7 @@ tmp: tmp.s foo.o
 	$(CC) -c tmp.s
 	$(CC) foo.o tmp.o -o tmp
 
-test: 9cc
+test: 9cc foo.o
 	./test.sh
 
 clean:
