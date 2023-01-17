@@ -8,7 +8,7 @@ void get_lval(Node *node) {
     error("the lhs of assignment expression should be a variable");
   }
   printf("  mov rax, rbp\n");
-  printf("  sub rax, %d\n", node->offset);
+  printf("  sub rax, %d      # get lval: offset %d\n", node->offset, node->offset);
   printf("  push rax\n");
 }
 
@@ -20,7 +20,7 @@ int gensym() {
 void gen_if_stmt(Node *node) {
   int end_label = gensym();
   gen(node->lhs);
-  printf("  pop rax\n");
+  printf("  pop rax         # if statement\n");
   printf("  cmp rax, 0\n");
   if (node->rhs->rhs) {
     int else_label = gensym();
@@ -60,11 +60,11 @@ void gen(Node *node) {
     printf("  ret\n");
     return;
   case ND_INT:
-    printf("  push %d\n", node->val);
+    printf("  push %d          # integer\n", node->val);
     return;
   case ND_LVAR:
     get_lval(node);
-    printf("  pop rax\n");
+    printf("  pop rax         # pop address to rax \n");
     printf("  mov rax, [rax]\n");
     printf("  push rax\n");
     return;
@@ -74,8 +74,8 @@ void gen(Node *node) {
   case ND_ASSIGN:
     get_lval(node->lhs);
     gen(node->rhs);
-    printf("  pop rdi\n");
-    printf("  pop rax\n");
+    printf("  pop rdi         # pop rhs to rdi\n");
+    printf("  pop rax         # pop address to rax\n");
     printf("  mov [rax], rdi\n");
     printf("  push rdi\n");
     return;
@@ -84,7 +84,7 @@ void gen(Node *node) {
     break;
   case ND_RETURN:
     gen(node->lhs);
-    printf("  pop rax\n");
+    printf("  pop rax         # pop return value to rax\n");
     printf("  mov rsp, rbp\n");
     printf("  pop rbp\n");
     printf("  ret\n");
@@ -92,48 +92,48 @@ void gen(Node *node) {
   case ND_BLOCK:
     for (Node *s = node->rhs; s; s = s->rhs) {
       gen(s->lhs);
-      printf("  pop rax\n");
+      printf("  pop rax       # pop statement value to rax\n");
     }
     return;
   case ND_ADD:
     gen(node->lhs);
     gen(node->rhs);
-    printf("  pop rdi\n");
-    printf("  pop rax\n");
-    printf("  add rax, rdi\n");
+    printf("  pop rdi         # pop rhs to rdi\n");
+    printf("  pop rax         # pop lhs to rax\n");
+    printf("  add rax, rdi    # rax += rdi\n");
     printf("  push rax\n");
     break;
   case ND_SUB:
     gen(node->lhs);
     gen(node->rhs);
-    printf("  pop rdi\n");
-    printf("  pop rax\n");
-    printf("  sub rax, rdi\n");
+    printf("  pop rdi         # pop rhs to rdi\n");
+    printf("  pop rax         # pop lhs to rax\n");
+    printf("  sub rax, rdi    # rax -= rdi\n");
     printf("  push rax\n");
     break;
   case ND_MUL:
     gen(node->lhs);
     gen(node->rhs);
-    printf("  pop rdi\n");
-    printf("  pop rax\n");
-    printf("  imul rax, rdi\n");
+    printf("  pop rdi         # pop rhs to rdi\n");
+    printf("  pop rax         # pop lhs to rax\n");
+    printf("  imul rax, rdi   # rax *= rdi\n");
     printf("  push rax\n");
     break;
   case ND_DIV:
     gen(node->lhs);
     gen(node->rhs);
-    printf("  pop rdi\n");
-    printf("  pop rax\n");
+    printf("  pop rdi         # pop rhs to rdi\n");
+    printf("  pop rax         # pop lhs to rax\n");
     printf("  cqo\n");
-    printf("  idiv rdi\n");
+    printf("  idiv rdi        # rax /= rdi\n");
     printf("  push rax\n");
     break;
   case ND_EQU:
     gen(node->lhs);
     gen(node->rhs);
-    printf("  pop rdi\n");
-    printf("  pop rax\n");
-    printf("  cmp rax, rdi\n");
+    printf("  pop rdi         # pop rhs to rdi\n");
+    printf("  pop rax         # pop lhs to rax\n");
+    printf("  cmp rax, rdi    # [lhs = rhs]?\n");
     printf("  sete al\n");
     printf("  movzx rax, al\n");
     printf("  push rax\n");
@@ -141,9 +141,9 @@ void gen(Node *node) {
   case ND_NEQ:
     gen(node->lhs);
     gen(node->rhs);
-    printf("  pop rdi\n");
-    printf("  pop rax\n");
-    printf("  cmp rax, rdi\n");
+    printf("  pop rdi         # pop rhs to rdi\n");
+    printf("  pop rax         # pop lhs to rax\n");
+    printf("  cmp rax, rdi    # [lhs != rhs]?\n");
     printf("  setne al\n");
     printf("  movzx rax, al\n");
     printf("  push rax\n");
@@ -151,9 +151,9 @@ void gen(Node *node) {
   case ND_LES:
     gen(node->lhs);
     gen(node->rhs);
-    printf("  pop rdi\n");
-    printf("  pop rax\n");
-    printf("  cmp rax, rdi\n");
+    printf("  pop rdi         # pop rhs to rdi\n");
+    printf("  pop rax         # pop lhs to rax\n");
+    printf("  cmp rax, rdi    # [lhs < rhs]?\n");
     printf("  setl al\n");
     printf("  movzx rax, al\n");
     printf("  push rax\n");
@@ -161,9 +161,9 @@ void gen(Node *node) {
   case ND_LEQ:
     gen(node->lhs);
     gen(node->rhs);
-    printf("  pop rdi\n");
-    printf("  pop rax\n");
-    printf("  cmp rax, rdi\n");
+    printf("  pop rdi         # pop rhs to rdi\n");
+    printf("  pop rax         # pop lhs to rax\n");
+    printf("  cmp rax, rdi    # [lhs <= rhs]?\n");
     printf("  setle al\n");
     printf("  movzx rax, al\n");
     printf("  push rax\n");
