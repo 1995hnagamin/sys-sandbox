@@ -50,7 +50,7 @@ int is_alnum(char c) {
 
 bool is_operator(char *op, Token *token) {
   return token->kind == TK_RESERVED
-    && ((int)strlen(op)) == token->len
+    && (int)(strlen(op)) == token->len
     && memcmp(token->str, op, token->len) == 0;
 }
 
@@ -110,7 +110,7 @@ bool is_symbol(char c) {
     || c == '<' || c == '>'
     || c == '(' || c == ')'
     || c == '{' || c == '}'
-    || c == '='
+    || c == '=' || c == ','
     || c == ';';
 }
 
@@ -221,6 +221,10 @@ void view_node(Node *node) {
   if (node->kind == ND_FCALL) {
     fprintf(stderr, "(call ");
     fprintf(stderr, "%.*s", node->tok->len, node->tok->str);
+    for (Node *n = node->rhs; n; n = n->rhs) {
+      fprintf(stderr, " ");
+      view_node(n->lhs);
+    }
     fprintf(stderr, ")");
     return;
   }
@@ -445,10 +449,15 @@ Node *primary() {
   }
   if (consume("(")) {
     // shoule be a function call
-    consume(")");
-    Node *node = new_node(ND_FCALL, NULL, NULL);
-    node->tok = tok;
-    return node;
+    Node *call = new_node(ND_FCALL, NULL, NULL);
+    call->tok = tok;
+    Node *node = call;
+    while (!consume(")")) {
+      node->rhs = new_node(ND_INVALID, expr(), NULL);
+      node = node->rhs;
+      consume(",");
+    }
+    return call;
   }
   LVar *lvar = find_lvar(tok);
   if (lvar) {
