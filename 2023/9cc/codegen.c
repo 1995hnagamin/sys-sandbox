@@ -24,16 +24,16 @@ void gen_if_stmt(Node *node) {
   printf("  cmp rax, 0\n");
   if (node->rhs->rhs) {
     int else_label = gensym();
-    printf("  je .LElse%d\n", else_label);
+    printf("  je .L.else.%d\n", else_label);
     gen(node->rhs->lhs); // then
-    printf("  jmp .LEnd%d\n", end_label);
-    printf(".LElse%d:\n", else_label);
+    printf("  jmp .L.end.%d\n", end_label);
+    printf(".L.else.%d:\n", else_label);
     gen(node->rhs->rhs); // else
   } else {
-    printf("  je .LEnd%d\n", end_label);
+    printf("  je .L.end.%d\n", end_label);
     gen(node->rhs->lhs); // then
   }
-  printf(".LEnd%d:\n", end_label);
+  printf(".L.end.%d:\n", end_label);
   return;
 }
 
