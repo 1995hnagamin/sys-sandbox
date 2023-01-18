@@ -10,4 +10,4 @@ description = "Rust Netcat"
 [dependencies]
 clap = "2.20.3"
 libc = "0.2.43"
-nix = "0.16.0"
+nix = "0.20.2"
