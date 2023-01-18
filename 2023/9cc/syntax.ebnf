@@ -27,4 +27,6 @@ unary = ("+" | "-")? primary;
 
 primary = num
         | ident ( "("  ")" )?
+        | "&" unary
+        | "*" unary
         | "(" expr ")";

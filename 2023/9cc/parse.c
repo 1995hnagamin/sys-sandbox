@@ -107,6 +107,7 @@ bool is_2char_symbol(char *p) {
 bool is_symbol(char c) {
   return c == '+' || c == '-'
     || c == '*' || c == '/'
+    || c == '&'
     || c == '<' || c == '>'
     || c == '(' || c == ')'
     || c == '{' || c == '}'
@@ -237,6 +238,18 @@ void view_node(Node *node) {
       fprintf(stderr, " ");
       view_node(n->lhs);
     }
+    fprintf(stderr, ")");
+    return;
+  }
+  if (node->kind == ND_ADDR) {
+    fprintf(stderr, "(address ");
+    view_node(node->lhs);
+    fprintf(stderr, ")");
+    return;
+  }
+  if (node->kind == ND_DEREF) {
+    fprintf(stderr, "(deref ");
+    view_node(node->lhs);
     fprintf(stderr, ")");
     return;
   }
@@ -469,6 +482,14 @@ Node *primary() {
     Node *node = expr();
     expect(")");
     return node;
+  }
+  if (consume("&")) {
+    Node *node = unary();
+    return new_node(ND_ADDR, node, NULL);
+  }
+  if (consume("*")) {
+    Node *node = unary();
+    return new_node(ND_DEREF, node, NULL);
   }
   Token *tok = consume_ident();
   if (!tok) {

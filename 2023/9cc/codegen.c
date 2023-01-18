@@ -185,6 +185,15 @@ void gen(Node *node) {
     printf("  movzx rax, al\n");
     printf("  push rax\n");
     break;
+  case ND_ADDR:
+    get_lval(node->lhs);
+    break;
+  case ND_DEREF:
+    gen(node->lhs);
+    printf("  pop rax\n");
+    printf("  mov rax, [rax]\n");
+    printf("  push rax\n");
+    break;
   case ND_INVALID:
     fprintf(stderr, "fatal error in gen()\n");
     exit(1);

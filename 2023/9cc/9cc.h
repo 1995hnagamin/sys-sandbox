@@ -36,6 +36,8 @@ typedef enum {
   ND_NEQ, // !=
   ND_LES, // <
   ND_LEQ, // <=
+  ND_ADDR, // &
+  ND_DEREF, // *
   ND_INT, // integers
   ND_LVAR, // local variables
   ND_BLOCK, // compound statements
