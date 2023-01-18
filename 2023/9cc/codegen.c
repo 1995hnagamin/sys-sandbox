@@ -62,7 +62,12 @@ void gen_fn_call(Node *call) {
     gen(arg->lhs);
     printf("  pop %s\n", REG_NAMES[i]);
   }
+  // https://stackoverflow.com/a/9600102
+  printf("  push rsp          # 16-align\n");
+  printf("  push [rsp]\n");
+  printf("  and rsp, -0x10\n");
   printf("  call _%.*s\n", call->tok->len, call->tok->str);
+  printf("  mov rsp, [rsp + 8]\n");
   printf("  push rax\n");
 }
 
