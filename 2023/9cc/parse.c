@@ -36,7 +36,7 @@ void error_at(char *loc, char *fmt, ...) {
     fprintf(stderr, " ");
   }
   fprintf(stderr, "^ ");
-  fprintf(stderr, fmt, ap);
+  vfprintf(stderr, fmt, ap);
   fprintf(stderr, "\n");
   exit(1);
 }
