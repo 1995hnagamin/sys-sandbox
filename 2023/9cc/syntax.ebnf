@@ -1,9 +1,9 @@
 program = fndef*;
 
-fndef = ident "(" params? ")" "{" stmt* "}";
+fndef = "int" ident "(" params? ")" "{" stmt* "}";
 
-params = ident
-       | ident "," params;
+params = "int" ident
+       | "int" ident "," params;
 
 stmt = expr ";"
      | "if" "(" expr ")" stmt ("else" stmt)?

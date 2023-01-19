@@ -86,6 +86,13 @@ void expect(char *op) {
   CUR_TOKEN = CUR_TOKEN->next;
 }
 
+void expect_tk(TokenKind tk) {
+  if (CUR_TOKEN->kind != tk) {
+    error_at(CUR_TOKEN->str, "unexpected token");
+  }
+  CUR_TOKEN = CUR_TOKEN->next;
+}
+
 int expect_number() {
   if (CUR_TOKEN->kind != TK_NUM) {
     error_at(CUR_TOKEN->str, "not a number");
@@ -348,15 +355,16 @@ void parse() {
 
 Node *code[100];
 void program() {
-  Token *fn_name;
   int i = 0;
-  while ((fn_name = consume_ident())) {
+  while (consume_tk(TK_INT)) {
+    Token *fn_name = consume_ident();
     LOCAL_VARS = new_lvar(NULL, "", 0, 0);
     Node *def = new_node(ND_FNDEF, NULL, NULL);
     def->tok = fn_name;
     expect("(");
     Node *node = def;
     while (!consume(")")) {
+      expect_tk(TK_INT);
       Token *name = consume_ident();
       node->rhs = new_node(ND_INVALID, NULL, NULL);
       node = node->rhs;
