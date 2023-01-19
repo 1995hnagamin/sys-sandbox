@@ -76,6 +76,9 @@ void gen(Node *node) {
   case ND_FNDEF:
     gen_fn_def(node);
     return;
+  case ND_DECL:
+    // no need for code generation
+    break;
   case ND_INT:
     printf("  push %d          # integer\n", node->val);
     return;

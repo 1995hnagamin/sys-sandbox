@@ -3,6 +3,7 @@
 
 typedef enum {
   TK_IF,
+  TK_INT,
   TK_ELSE,
   TK_RETURN,
   TK_RESERVED,
@@ -24,6 +25,7 @@ typedef struct Token Token;
 typedef enum {
   ND_INVALID,
   ND_FNDEF,
+  ND_DECL,
   ND_IF,
   ND_RETURN,
   ND_ASSIGN, // assignments

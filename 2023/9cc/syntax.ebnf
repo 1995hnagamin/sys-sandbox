@@ -8,8 +8,10 @@ params = ident
 stmt = expr ";"
      | "if" "(" expr ")" stmt ("else" stmt)?
      | "return" expr ";"
-     | "{" stmt* "}"
+     | "{" (stmt | declaration)* "}"
      ;
+
+declaration = "int" ident ";";
 
 expr = assign;
 

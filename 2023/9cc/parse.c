@@ -149,6 +149,11 @@ Token *tokenize(char *p) {
       p += 2;
       continue;
     }
+    if (strncmp("int", p, 2) == 0 && !is_alnum(p[3])) {
+      cur = new_token(TK_INT, cur, p);
+      p += 3;
+      continue;
+    }
     if (strncmp("else", p, 4) == 0 && !is_alnum(p[4])) {
       cur = new_token(TK_ELSE, cur, p);
       p += 4;
@@ -218,6 +223,12 @@ void view_node(Node *node) {
     }
     fprintf(stderr, ") ");
     view_node(node->lhs);
+    fprintf(stderr, ")");
+    return;
+  }
+  if (node->kind == ND_DECL) {
+    fprintf(stderr, "(decl ");
+    fprintf(stderr, "%.*s ", node->tok->len, node->tok->str);
     fprintf(stderr, ")");
     return;
   }
@@ -321,6 +332,7 @@ Node *new_node_num(int val) {
 
 void program();
 Node *stmt();
+Node *declaration();
 Node *expr();
 Node *assign();
 Node *equality();
@@ -378,6 +390,9 @@ Node *stmt() {
     }
     return nif;
   }
+  if (CUR_TOKEN->kind == TK_INT) {
+    return declaration();
+  }
   Node *node;
   if (consume("{")) {
     node = new_node(ND_BLOCK, NULL, NULL);
@@ -422,6 +437,18 @@ Node *equality() {
       return node;
     }
   }
+}
+
+Node *declaration() {
+  consume_tk(TK_INT);
+  Token *var_name = consume_ident();
+  expect(";");
+  LVar *lvar = new_lvar(LOCAL_VARS, var_name->str, var_name->len, LOCAL_VARS->offset+8);
+  LOCAL_VARS = lvar;
+  Node *id = new_node_ident(lvar->offset);
+  Node *node = new_node(ND_DECL, id, NULL);
+  node->tok = var_name;
+  return node;
 }
 
 Node *relational() {
@@ -512,8 +539,7 @@ Node *primary() {
   if (lvar) {
     return new_node_ident(lvar->offset);
   }
-  // make a new variable
-  lvar = new_lvar(LOCAL_VARS, tok->str, tok->len, LOCAL_VARS->offset+8);
-  LOCAL_VARS = lvar;
-  return new_node_ident(lvar->offset);
+  // error: variable used before declaration
+  error_at(CUR_TOKEN->str, "undeclared variable: %.*s\n", tok->len, tok->str);
+  exit(1);
 }
