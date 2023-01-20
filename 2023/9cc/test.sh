@@ -53,6 +53,7 @@ assert 22 'int main() { int a; a=12; int b; b=34; bar(a, b); return b-a; }'
 assert 10 'int f(int x) { if (5>x) return 10; foo(); return f(x-1); } int main() { return f(10); }'
 assert 91 'int mc(int n) { if (n > 100) return n-10; else mc(mc(n+11)); } int main() { return mc(99); }'
 assert 13 'int fib(int n) { if (n < 2) return 1; else fib(n-1)+fib(n-2); } int main() { return fib(6); }'
-assert 15 'int main() { int x; int p; x = 15; p = &x; return *p; }'
+assert 15 'int main() { int x; int *p; x = 15; p = &x; return *p; }'
+assert  3 'int main() { int x; x = 10; int *p; p = &x; *p = 3; return x; }'
 
 echo OK

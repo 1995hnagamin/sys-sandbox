@@ -92,7 +92,13 @@ void gen(Node *node) {
     gen_if_stmt(node);
     return;
   case ND_ASSIGN:
-    get_lval(node->lhs);
+    printf("  # ND_ASSIGN\n");
+    if (node->lhs->kind == ND_LVAR) {
+      get_lval(node->lhs);
+    } else {
+      // node->lhs =  *p
+      gen(node->lhs->lhs);
+    }
     gen(node->rhs);
     printf("  pop rdi         # pop rhs to rdi\n");
     printf("  pop rax         # pop address to rax\n");
