@@ -8,7 +8,7 @@ void get_lval(Node *node) {
     error("the lhs of assignment expression should be a variable");
   }
   printf("  mov rax, rbp\n");
-  printf("  sub rax, %d      # get lval: offset %d\n", node->offset, node->offset);
+  printf("  sub rax, %d      # get lval: offset %d\n", node->lvar->offset, node->lvar->offset);
   printf("  push rax\n");
 }
 
@@ -47,7 +47,7 @@ void gen_fn_def(Node *def) {
   int i = 0;
   for (Node *param = def->rhs; param; param = param->rhs) {
     printf("  mov rax, rbp\n");
-    printf("  sub rax, %d\n", param->lhs->offset);
+    printf("  sub rax, %d\n", param->lhs->lvar->offset);
     printf("  mov [rax], %s\n", REG_NAMES[i++]);
   }
   gen(def->lhs); // function body

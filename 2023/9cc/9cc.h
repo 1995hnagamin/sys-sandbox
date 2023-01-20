@@ -58,7 +58,7 @@ struct Node {
   struct Node *lhs;
   struct Node *rhs;
   int val; // valid if kind == ND_INT
-  int offset; // valid if kind == ND_LVAR
+  struct LVar *lvar; // valid if kind == ND_LVAR
   Token *tok; // valid if kind == ND_FNCALL
   struct Type *ty;
 };

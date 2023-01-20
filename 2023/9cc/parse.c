@@ -230,7 +230,7 @@ void view_node(Node *node) {
     return;
   }
   if (node->kind == ND_LVAR) {
-    fprintf(stderr, "[%d]", node->offset);
+    fprintf(stderr, "[%d]", node->lvar->offset);
     return;
   }
   if (node->kind == ND_FNDEF) {
@@ -335,10 +335,10 @@ void view_node(Node *node) {
   fprintf(stderr, ")");
 }
 
-Node *new_node_ident(int offset) {
+Node *new_node_ident(LVar *lvar) {
   Node *node = calloc(1, sizeof(Node));
   node->kind = ND_LVAR;
-  node->offset = offset;
+  node->lvar = lvar;
   return node;
 }
 
@@ -383,7 +383,7 @@ void program() {
       node = node->rhs;
       LVar *lvar = new_lvar(LOCAL_VARS, name->str, name->len, LOCAL_VARS->offset+8);
       LOCAL_VARS = lvar;
-      node->lhs = new_node_ident(lvar->offset);
+      node->lhs = new_node_ident(lvar);
       consume(",");
     }
     Node *body = stmt();
@@ -472,7 +472,7 @@ Node *declarator() {
   if ((var_name = consume_ident())) {
     LVar *lvar = new_lvar(LOCAL_VARS, var_name->str, var_name->len, LOCAL_VARS->offset+8);
     LOCAL_VARS = lvar;
-    Node *id = new_node_ident(lvar->offset);
+    Node *id = new_node_ident(lvar);
     Node *node = new_node(ND_DECL, id, NULL);
     node->tok = var_name;
     node->ty = &T_INT;
@@ -570,7 +570,7 @@ Node *primary() {
   }
   LVar *lvar = find_lvar(tok);
   if (lvar) {
-    return new_node_ident(lvar->offset);
+    return new_node_ident(lvar);
   }
   // error: variable used before declaration
   error_at(CUR_TOKEN->str, "undeclared variable: %.*s\n", tok->len, tok->str);
