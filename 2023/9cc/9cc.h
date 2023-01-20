@@ -19,8 +19,16 @@ struct Token {
   char *str;
   int len;
 };
-
 typedef struct Token Token;
+
+struct Type {
+  enum {
+    TY_INT,
+    TY_PTR,
+  } ty;
+  struct Type *ptr_to;
+};
+typedef struct Type Type;
 
 typedef enum {
   ND_INVALID,
@@ -52,6 +60,7 @@ struct Node {
   int val; // valid if kind == ND_INT
   int offset; // valid if kind == ND_LVAR
   Token *tok; // valid if kind == ND_FNCALL
+  struct Type *ty;
 };
 
 typedef struct Node Node;

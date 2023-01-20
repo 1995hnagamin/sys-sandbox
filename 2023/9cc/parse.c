@@ -17,11 +17,23 @@ Token *new_token(TokenKind kind, Token *cur, char *str) {
   return tok;
 }
 
+Type T_INT = {
+  TY_INT,
+  NULL,
+};
+
+Type *new_ty_ptr(Type *to) {
+  Type *t = calloc(1, sizeof(Type));
+  t->ty = TY_PTR;
+  t->ptr_to = to;
+  return t;
+}
+
 void error(char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
 
-  fprintf(stderr, fmt, ap);
+  vfprintf(stderr, fmt, ap);
   fprintf(stderr, "\n");
   exit(1);
 }
@@ -340,6 +352,7 @@ Node *new_node_num(int val) {
 void program();
 Node *stmt();
 Node *declaration();
+Node *declarator();
 Node *expr();
 Node *assign();
 Node *equality();
@@ -449,13 +462,25 @@ Node *equality() {
 
 Node *declaration() {
   consume_tk(TK_INT);
-  Token *var_name = consume_ident();
+  Node *node = declarator();
   expect(";");
-  LVar *lvar = new_lvar(LOCAL_VARS, var_name->str, var_name->len, LOCAL_VARS->offset+8);
-  LOCAL_VARS = lvar;
-  Node *id = new_node_ident(lvar->offset);
-  Node *node = new_node(ND_DECL, id, NULL);
-  node->tok = var_name;
+  return node;
+}
+
+Node *declarator() {
+  Token *var_name;
+  if ((var_name = consume_ident())) {
+    LVar *lvar = new_lvar(LOCAL_VARS, var_name->str, var_name->len, LOCAL_VARS->offset+8);
+    LOCAL_VARS = lvar;
+    Node *id = new_node_ident(lvar->offset);
+    Node *node = new_node(ND_DECL, id, NULL);
+    node->tok = var_name;
+    node->ty = &T_INT;
+    return node;
+  }
+  expect("*");
+  Node *node = declarator();
+  node->ty = new_ty_ptr(node->ty);
   return node;
 }
 

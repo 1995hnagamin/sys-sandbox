@@ -11,7 +11,10 @@ stmt = expr ";"
      | "{" (stmt | declaration)* "}"
      ;
 
-declaration = "int" ident ";";
+declaration = "int" declarator ";";
+
+declarators = ident
+            | "*" declarator;
 
 expr = assign;
 
