@@ -25,10 +25,13 @@ struct Type {
   enum {
     TY_INT,
     TY_PTR,
-  } ty;
+  } kind;
   struct Type *ptr_to;
 };
 typedef struct Type Type;
+
+Type *ty_int();
+Type *new_ty_ptr(Type *to);
 
 typedef enum {
   ND_INVALID,
@@ -65,11 +68,14 @@ struct Node {
 
 typedef struct Node Node;
 
+void set_type(Node *node);
+
 struct LVar {
   struct LVar *next;
   char *name;
   int len;
   int offset;
+  Type *ty;
 };
 typedef struct LVar LVar;
 

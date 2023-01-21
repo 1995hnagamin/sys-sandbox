@@ -17,6 +17,15 @@ int gensym() {
   return ++GENSYM_IDX;
 }
 
+int nbytes_type(Type *ty) {
+  switch (ty->kind) {
+  case TY_INT:
+    return sizeof(int);
+  case TY_PTR:
+    return sizeof(int*);
+  }
+}
+
 void gen_if_stmt(Node *node) {
   int end_label = gensym();
   gen(node->lhs);
@@ -124,6 +133,21 @@ void gen(Node *node) {
   case ND_ADD:
     gen(node->lhs);
     gen(node->rhs);
+    if (node->lhs->ty->kind == TY_PTR) {
+      printf("  pop rdi         # pop rhs to rdi\n");
+      printf("  imul rdi, %d\n", nbytes_type(node->lhs->ty->ptr_to));
+      printf("  pop rax         # pop lhs to rax\n");
+      printf("  add rax, rdi    # rax += rdi\n");
+      printf("  push rax\n");
+      break;
+    } else if (node->rhs->ty->kind == TY_PTR) {
+      printf("  pop rdi         # pop rhs to rdi\n");
+      printf("  pop rax         # pop lhs to rax\n");
+      printf("  imul rax, %d\n", nbytes_type(node->lhs->ty->ptr_to));
+      printf("  add rax, rdi    # rax += rdi\n");
+      printf("  push rax\n");
+      break;
+    }
     printf("  pop rdi         # pop rhs to rdi\n");
     printf("  pop rax         # pop lhs to rax\n");
     printf("  add rax, rdi    # rax += rdi\n");

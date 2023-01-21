@@ -17,18 +17,6 @@ Token *new_token(TokenKind kind, Token *cur, char *str) {
   return tok;
 }
 
-Type T_INT = {
-  TY_INT,
-  NULL,
-};
-
-Type *new_ty_ptr(Type *to) {
-  Type *t = calloc(1, sizeof(Type));
-  t->ty = TY_PTR;
-  t->ptr_to = to;
-  return t;
-}
-
 void error(char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
@@ -151,6 +139,7 @@ LVar *new_lvar(struct LVar *next, char *name, int len, int offset) {
   lvar->name = name;
   lvar->len = len;
   lvar->offset = offset;
+  lvar->ty = NULL;
   return lvar;
 }
 
@@ -218,6 +207,7 @@ Node *new_node(NodeKind kind, Node *lhs, Node *rhs) {
   node->kind = kind;
   node->lhs = lhs;
   node->rhs = rhs;
+  node->ty = NULL;
   return node;
 }
 
@@ -352,7 +342,7 @@ Node *new_node_num(int val) {
 void program();
 Node *stmt();
 Node *declaration();
-Node *declarator();
+Node *declarator(Type *ty_spec);
 Node *expr();
 Node *assign();
 Node *equality();
@@ -382,6 +372,7 @@ void program() {
       node->rhs = new_node(ND_INVALID, NULL, NULL);
       node = node->rhs;
       LVar *lvar = new_lvar(LOCAL_VARS, name->str, name->len, LOCAL_VARS->offset+8);
+      lvar->ty = ty_int();
       LOCAL_VARS = lvar;
       node->lhs = new_node_ident(lvar);
       consume(",");
@@ -389,6 +380,7 @@ void program() {
     Node *body = stmt();
     def->lhs = body;
     code[i++] = def;
+    set_type(def);
   }
   code[i] = NULL;
 }
@@ -462,12 +454,12 @@ Node *equality() {
 
 Node *declaration() {
   consume_tk(TK_INT);
-  Node *node = declarator();
+  Node *node = declarator(ty_int());
   expect(";");
   return node;
 }
 
-Node *declarator() {
+Node *declarator(Type *ty_spec) {
   Token *var_name;
   if ((var_name = consume_ident())) {
     LVar *lvar = new_lvar(LOCAL_VARS, var_name->str, var_name->len, LOCAL_VARS->offset+8);
@@ -475,12 +467,12 @@ Node *declarator() {
     Node *id = new_node_ident(lvar);
     Node *node = new_node(ND_DECL, id, NULL);
     node->tok = var_name;
-    node->ty = &T_INT;
+    lvar->ty = ty_spec;
+    node->ty = ty_spec;
     return node;
   }
   expect("*");
-  Node *node = declarator();
-  node->ty = new_ty_ptr(node->ty);
+  Node *node = declarator(new_ty_ptr(ty_spec));
   return node;
 }
 
