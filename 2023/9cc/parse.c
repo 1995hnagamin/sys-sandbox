@@ -227,24 +227,29 @@ Node *declaration() {
 Node *direct_declarator(Type *type) {
   Token *var_name = consume_ident();
   Node *ident = new_node_ident(NULL);
-  Node *node = ident;
-  node->ty = type;
+  ident->tok = var_name;
+  Type parent = { .kind=TY_PTR, .ptr_to=type };
+  Type *tail = &parent;
   for (;;) {
       if (consume("[")) {
         int num = expect_number();
         expect("]");
-        node = new_node(ND_DECL, node, NULL);
-        node->ty = new_ty_array(num, node->lhs->ty);
+        Type *arr = new_ty_array(num, type);
+        tail->ptr_to = arr;
+        tail = arr;
       } else {
         break;
       }
   }
-  node->tok = var_name;
   LVar *lvar = new_lvar(LOCAL_VARS, var_name->str, var_name->len, LOCAL_VARS->offset+8);
-  lvar->ty = node->ty;
-  ident->lvar = lvar;
   LOCAL_VARS = lvar;
-  return node;
+  lvar->ty = parent.ptr_to;
+  ident->lvar = lvar;
+  ident->ty = lvar->ty;
+  Node *decl = new_node(ND_DECL, ident, NULL);
+  decl->ty = lvar->ty;
+  decl->tok = var_name;
+  return decl;
 }
 
 /*
