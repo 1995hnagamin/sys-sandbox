@@ -5,6 +5,7 @@
 Type T_INT = {
   TY_INT,
   NULL,
+  0,
 };
 
 Type *ty_int() {
