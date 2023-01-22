@@ -46,7 +46,7 @@ void gen_if_stmt(Node *node) {
   return;
 }
 
-char *REG_NAMES[6] = {"rdi", "rsi", "rdx", "rcx", "r8d", "r9d"};
+char *REG_NAMES[6] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
 
 void gen_fn_def(Node *def) {
   printf("_%.*s:\n", def->tok->len, def->tok->str);
