@@ -3,13 +3,19 @@
 #include <stdlib.h>
 #include "9cc.h"
 
-void get_lval(Node *node) {
-  if (node->kind != ND_LVAR) {
+void gen_addr(Node *node) {
+  switch (node->kind) {
+  case ND_LVAR:
+    printf("  mov rax, rbp\n");
+    printf("  sub rax, %d      # get lval: offset %d\n", node->lvar->offset, node->lvar->offset);
+    printf("  push rax\n");
+    break;
+  case ND_DEREF:
+    gen(node->lhs);
+    break;
+  default:
     error("the lhs of assignment expression should be a variable");
   }
-  printf("  mov rax, rbp\n");
-  printf("  sub rax, %d      # get lval: offset %d\n", node->lvar->offset, node->lvar->offset);
-  printf("  push rax\n");
 }
 
 int GENSYM_IDX;
@@ -94,7 +100,7 @@ void gen(Node *node) {
     printf("  push %d          # integer\n", node->val);
     return;
   case ND_LVAR:
-    get_lval(node);
+    gen_addr(node);
     printf("  pop rax         # pop address to rax \n");
     printf("  mov rax, [rax]\n");
     printf("  push rax\n");
@@ -105,7 +111,7 @@ void gen(Node *node) {
   case ND_ASSIGN:
     printf("  # ND_ASSIGN\n");
     if (node->lhs->kind == ND_LVAR) {
-      get_lval(node->lhs);
+      gen_addr(node->lhs);
     } else {
       // node->lhs =  *p
       gen(node->lhs->lhs);
@@ -221,7 +227,7 @@ void gen(Node *node) {
     printf("  push rax\n");
     break;
   case ND_ADDR:
-    get_lval(node->lhs);
+    gen_addr(node->lhs);
     break;
   case ND_DEREF:
     gen(node->lhs);
