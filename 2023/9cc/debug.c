@@ -131,7 +131,9 @@ void view_node(Node *node) {
     fprintf(stderr, "fatal error in view_node()\n");
     exit(1);
   }
-  fprintf(stderr, " ");
+  fprintf(stderr, " [");
+  view_type(node->ty);
+  fprintf(stderr, "] ");
   view_node(node->lhs);
   fprintf(stderr, " ");
   view_node(node->rhs);
