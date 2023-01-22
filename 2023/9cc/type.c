@@ -43,6 +43,7 @@ void set_type(Node *node) {
     break;
   case ND_DECL:
     set_type(node->lhs);
+    node->ty = node->lhs->ty;
     break;
   case ND_INT:
     node->ty = &T_INT;

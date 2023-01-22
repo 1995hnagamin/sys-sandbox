@@ -81,6 +81,17 @@ LVar *new_lvar(struct LVar *next, char *name, int len, int offset) {
   return lvar;
 }
 
+int max(int x, int y) {
+  return x > y ? x : y;
+}
+
+LVar *register_lvar(Token *name, Type *type) {
+  int offset = LOCAL_VARS->offset + max(8, nbytes_type(type));
+  LVar *lvar = new_lvar(LOCAL_VARS, name->str, name->len, offset);
+  LOCAL_VARS = lvar;
+  return lvar;
+}
+
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs) {
   Node *node = calloc(1, sizeof(Node));
   node->kind = kind;
@@ -224,30 +235,28 @@ Node *declaration() {
   return node;
 }
 
-Node *direct_declarator(Type *type) {
+Node *direct_declarator(Type *spec_type) {
   Token *var_name = consume_ident();
   Node *ident = new_node_ident(NULL);
   ident->tok = var_name;
-  Type parent = { .kind=TY_PTR, .ptr_to=type };
+  Type parent = { .kind=TY_PTR, .ptr_to=spec_type };
   Type *tail = &parent;
   for (;;) {
       if (consume("[")) {
         int num = expect_number();
         expect("]");
-        Type *arr = new_ty_array(num, type);
+        Type *arr = new_ty_array(num, spec_type);
         tail->ptr_to = arr;
         tail = arr;
       } else {
         break;
       }
   }
-  LVar *lvar = new_lvar(LOCAL_VARS, var_name->str, var_name->len, LOCAL_VARS->offset+8);
-  LOCAL_VARS = lvar;
-  lvar->ty = parent.ptr_to;
+  Type *type = parent.ptr_to;
+  LVar *lvar = register_lvar(var_name, type);
+  lvar->ty = type;
   ident->lvar = lvar;
-  ident->ty = lvar->ty;
   Node *decl = new_node(ND_DECL, ident, NULL);
-  decl->ty = lvar->ty;
   decl->tok = var_name;
   return decl;
 }
