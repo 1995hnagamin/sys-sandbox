@@ -64,5 +64,6 @@ assert  4 'int main() { int *y; return sizeof(*y); }'
 assert  4 'int main() { return sizeof(100); }'
 assert  4 'int main() { return sizeof(sizeof(100)); }'
 assert 13 'int main() { int x[10]; return 13; }'
+assert 14 'int main() { int a[2]; *a = 10; *(a+1) = 4; return *a + *(a+1); }'
 
 echo OK

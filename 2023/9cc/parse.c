@@ -115,6 +115,16 @@ Node *new_node_num(int val) {
   return node;
 }
 
+Node *decay(Node *node) {
+  set_type(node);
+  switch (node->ty->kind) {
+  case TY_ARRAY:
+    return new_node(ND_ADDR, node, NULL);
+  default:
+    return node;
+  }
+}
+
 void program();
 Node *stmt();
 Node *declaration();
@@ -219,9 +229,9 @@ Node *equality() {
   Node *node = relational();
   for (;;) {
     if (consume("==")) {
-      node = new_node(ND_EQU, node, relational());
+      node = new_node(ND_EQU, decay(node), decay(relational()));
     } else if (consume("!=")) {
-      node = new_node(ND_NEQ, node, relational());
+      node = new_node(ND_NEQ, decay(node), decay(relational()));
     } else {
       return node;
     }
@@ -276,13 +286,13 @@ Node *relational() {
   Node *node = add();
   for (;;) {
     if (consume("<=")) {
-      node = new_node(ND_LEQ, node, add());
+      node = new_node(ND_LEQ, decay(node), decay(add()));
     } else if (consume("<")) {
-      node = new_node(ND_LES, node, add());
+      node = new_node(ND_LES, decay(node), decay(add()));
     } else if (consume(">=")) {
-      node = new_node(ND_LEQ, add(), node);
+      node = new_node(ND_LEQ, decay(add()), decay(node));
     } else if (consume(">")) {
-      node = new_node(ND_LES, add(), node);
+      node = new_node(ND_LES, decay(add()), decay(node));
     } else {
       return node;
     }
@@ -293,9 +303,9 @@ Node *add() {
   Node *node = mul();
   for (;;) {
     if (consume("+")) {
-      node = new_node(ND_ADD, node, mul());
+      node = new_node(ND_ADD, decay(node), decay(mul()));
     } else if (consume("-")) {
-      node = new_node(ND_SUB, node, mul());
+      node = new_node(ND_SUB, decay(node), decay(mul()));
     } else {
       return node;
     }
@@ -313,9 +323,9 @@ Node *mul() {
 
   for (;;) {
     if (consume("*")) {
-      node = new_node(ND_MUL, node, unary());
+      node = new_node(ND_MUL, decay(node), decay(unary()));
     } else if (consume("/")) {
-      node = new_node(ND_DIV, node, unary());
+      node = new_node(ND_DIV, decay(node), decay(unary()));
     } else {
       return node;
     }
@@ -324,9 +334,9 @@ Node *mul() {
 
 Node *unary() {
   if (consume("+")) {
-    return primary();
+    return decay(primary());
   } else if (consume("-")) {
-    return new_node(ND_SUB, new_node_num(0), primary());
+    return new_node(ND_SUB, new_node_num(0), decay(primary()));
   }
   return primary();
 }
@@ -343,7 +353,7 @@ Node *primary() {
   }
   if (consume("*")) {
     Node *node = unary();
-    return new_node(ND_DEREF, node, NULL);
+    return new_node(ND_DEREF, decay(node), NULL);
   }
   Token *tok = consume_ident();
   if (!tok) {

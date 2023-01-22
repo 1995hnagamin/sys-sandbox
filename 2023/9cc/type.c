@@ -103,7 +103,14 @@ void set_type(Node *node) {
     break;
   case ND_ADDR:
     set_type(node->lhs);
-    node->ty = new_ty_ptr(node->lhs->ty);
+    switch (node->lhs->ty->kind) {
+    case TY_ARRAY:
+      node->ty = new_ty_ptr(node->lhs->ty->ptr_to);
+      break;
+    default:
+      node->ty = new_ty_ptr(node->lhs->ty);
+      break;
+    }
     break;
   case ND_DEREF:
     set_type(node->lhs);
