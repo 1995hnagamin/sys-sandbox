@@ -2,6 +2,26 @@
 #include <stdlib.h>
 #include "9cc.h"
 
+void view_type(Type *type) {
+  if (!type) {
+    return;
+  }
+  switch (type->kind) {
+  case TY_INT:
+    fprintf(stderr, "int");
+    break;
+  case TY_ARRAY:
+    fprintf(stderr, "(array %zu ", type->array_size);
+    view_type(type->ptr_to);
+    fprintf(stderr, ")");
+    break;
+  case TY_PTR:
+    fprintf(stderr, "(pointer ");
+    view_type(type->ptr_to);
+    fprintf(stderr, ")");
+  }
+}
+
 
 void view_node(Node *node) {
   if (!node) {
@@ -30,6 +50,7 @@ void view_node(Node *node) {
   if (node->kind == ND_DECL) {
     fprintf(stderr, "(decl ");
     fprintf(stderr, "%.*s ", node->tok->len, node->tok->str);
+    view_type(node->ty);
     fprintf(stderr, ")");
     return;
   }
