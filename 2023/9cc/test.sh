@@ -65,5 +65,7 @@ assert  4 'int main() { return sizeof(100); }'
 assert  4 'int main() { return sizeof(sizeof(100)); }'
 assert 13 'int main() { int x[10]; return 13; }'
 assert 14 'int main() { int a[2]; *a = 10; *(a+1) = 4; return *a + *(a+1); }'
+assert 17 'int main() { int a[10]; a[0] = 10; a[5] = 6; a[a[5]] = 1; return a[0]+a[5]+a[6];}'
+assert 20 'int main() { int a[3][3][3]; a[0][0][0] = 10; a[1][1][1] = 10; return a[0][0][0]+a[1][1][1];}'
 
 echo OK

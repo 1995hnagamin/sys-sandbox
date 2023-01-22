@@ -136,6 +136,7 @@ Node *relational();
 Node *add();
 Node *mul();
 Node *unary();
+Node *postfix();
 Node *primary();
 
 void parse() {
@@ -338,7 +339,19 @@ Node *unary() {
   } else if (consume("-")) {
     return new_node(ND_SUB, new_node_num(0), decay(primary()));
   }
-  return primary();
+  return postfix();
+}
+
+Node *postfix() {
+  Node *node = primary();
+  while (consume("[")) {
+    Node *idx = expr();
+    expect("]");
+    // a[i] => *(a+i)
+    node = new_node(ND_DEREF, new_node(ND_ADD, decay(node), decay(idx)), NULL);
+    set_type(node);
+  }
+  return node;
 }
 
 Node *primary() {
