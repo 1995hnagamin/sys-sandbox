@@ -21,6 +21,8 @@ int nbytes_type(Type *ty) {
   switch (ty->kind) {
   case TY_INT:
     return sizeof(int);
+  case TY_ARRAY:
+    return nbytes_type(ty->ptr_to) * ty->array_size;
   case TY_PTR:
     return sizeof(int*);
   }

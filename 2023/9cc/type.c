@@ -11,6 +11,14 @@ Type *ty_int() {
   return &T_INT;
 }
 
+Type *new_ty_array(size_t n, Type *to) {
+  Type *t = calloc(1, sizeof(Type));
+  t->kind = TY_ARRAY;
+  t->array_size = n;
+  t->ptr_to = to;
+  return t;
+}
+
 Type *new_ty_ptr(Type *to) {
   Type *t = calloc(1, sizeof(Type));
   t->kind = TY_PTR;

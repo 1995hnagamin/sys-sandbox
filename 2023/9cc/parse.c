@@ -224,21 +224,38 @@ Node *declaration() {
   return node;
 }
 
+Node *direct_declarator(Type *type) {
+  Token *var_name = consume_ident();
+  Node *ident = new_node_ident(NULL);
+  Node *node = ident;
+  node->ty = type;
+  for (;;) {
+      if (consume("[")) {
+        int num = expect_number();
+        expect("]");
+        node = new_node(ND_DECL, node, NULL);
+        node->ty = new_ty_array(num, node->lhs->ty);
+      } else {
+        break;
+      }
+  }
+  node->tok = var_name;
+  LVar *lvar = new_lvar(LOCAL_VARS, var_name->str, var_name->len, LOCAL_VARS->offset+8);
+  lvar->ty = node->ty;
+  ident->lvar = lvar;
+  LOCAL_VARS = lvar;
+  return node;
+}
+
+/*
+  int *x[5] => int *(x[5]) ... [5] * int
+ */
 Node *declarator(Type *ty_spec) {
-  Token *var_name;
-  if ((var_name = consume_ident())) {
-    LVar *lvar = new_lvar(LOCAL_VARS, var_name->str, var_name->len, LOCAL_VARS->offset+8);
-    LOCAL_VARS = lvar;
-    Node *id = new_node_ident(lvar);
-    Node *node = new_node(ND_DECL, id, NULL);
-    node->tok = var_name;
-    lvar->ty = ty_spec;
-    node->ty = ty_spec;
+  if (consume("*")) {
+    Node *node = declarator(new_ty_ptr(ty_spec));
     return node;
   }
-  expect("*");
-  Node *node = declarator(new_ty_ptr(ty_spec));
-  return node;
+  return direct_declarator(ty_spec);
 }
 
 Node *relational() {

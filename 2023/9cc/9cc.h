@@ -25,13 +25,16 @@ typedef struct Token Token;
 struct Type {
   enum {
     TY_INT,
+    TY_ARRAY,
     TY_PTR,
   } kind;
   struct Type *ptr_to;
+  size_t array_size; // valid if kind == TY_ARRAY
 };
 typedef struct Type Type;
 
 Type *ty_int();
+Type *new_ty_array(size_t n, Type *to);
 Type *new_ty_ptr(Type *to);
 
 typedef enum {

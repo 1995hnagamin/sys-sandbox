@@ -14,7 +14,8 @@ stmt = expr ";"
 declaration = "int" declarator ";";
 
 declarators = ident
-            | "*" declarator;
+            | "*" declarator
+            | declarator "[" num "]";;
 
 expr = assign;
 
