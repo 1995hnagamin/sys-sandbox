@@ -56,5 +56,12 @@ assert 21 'int sum(int a,int b,int c,int d,int e,int f){return a+b+c+d+e+f;}int 
 assert 13 'int fib(int n) { if (n < 2) return 1; else fib(n-1)+fib(n-2); } int main() { return fib(6); }'
 assert 15 'int main() { int x; int *p; x = 15; p = &x; return *p; }'
 assert  3 'int main() { int x; x = 10; int *p; p = &x; *p = 3; return x; }'
+assert  4 'int main() { int x; return sizeof(x); }'
+assert  8 'int main() { int *y; return sizeof(y); }'
+assert  4 'int main() { int x; return sizeof(x+3); }'
+assert  8 'int main() { int *y; return sizeof(y+3); }'
+assert  4 'int main() { int *y; return sizeof(*y); }'
+assert  4 'int main() { return sizeof(100); }'
+assert  4 'int main() { return sizeof(sizeof(100)); }'
 
 echo OK

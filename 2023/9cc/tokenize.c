@@ -99,6 +99,11 @@ Token *tokenize(char *p) {
       p += 6;
       continue;
     }
+    if (strncmp("sizeof", p, 6) == 0 && !is_alnum(p[6])) {
+        cur = new_token(TK_SIZEOF, cur, p);
+        p += 6;
+        continue;
+    }
     if (is_2char_symbol(p)) {
       cur = new_token(TK_RESERVED, cur, p);
       cur->len = 2;

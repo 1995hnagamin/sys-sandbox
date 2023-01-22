@@ -6,6 +6,7 @@ typedef enum {
   TK_INT,
   TK_ELSE,
   TK_RETURN,
+  TK_SIZEOF,
   TK_RESERVED,
   TK_IDENT,
   TK_NUM,
@@ -93,6 +94,7 @@ void parse();
 
 void view_node(Node *node);
 
+int nbytes_type(Type *ty);
 void gen(Node *node);
 
 #endif

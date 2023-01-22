@@ -28,7 +28,8 @@ add = mul ("+" mul | "-" mul)*;
 
 mul = unary ("*" unary | "/" unary)*;
 
-unary = ("+" | "-")? primary;
+unary = "sizeof" unary
+      | ("+" | "-")? primary;
 
 primary = num
         | ident ( "("  ")" )?

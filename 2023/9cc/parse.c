@@ -272,6 +272,12 @@ Node *add() {
 }
 
 Node *mul() {
+  if (consume_tk(TK_SIZEOF)) {
+    Node *exp = unary();
+    set_type(exp);
+    return new_node_num(nbytes_type(exp->ty));
+  }
+
   Node *node = unary();
 
   for (;;) {
