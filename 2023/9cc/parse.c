@@ -6,14 +6,14 @@
 #include <string.h>
 #include "9cc.h"
 
-bool is_operator(char *op, Token *token) {
+bool match_reserved_token(char *op, Token *token) {
   return token->kind == TK_RESERVED
     && (int)(strlen(op)) == token->len
     && memcmp(token->str, op, token->len) == 0;
 }
 
 bool consume(char *op) {
-  if (!is_operator(op, CUR_TOKEN)) {
+  if (!match_reserved_token(op, CUR_TOKEN)) {
     return false;
   }
   CUR_TOKEN = CUR_TOKEN->next;
@@ -38,7 +38,7 @@ bool consume_tk(TokenKind tk) {
 }
 
 void expect(char *op) {
-  if (!is_operator(op, CUR_TOKEN)) {
+  if (!match_reserved_token(op, CUR_TOKEN)) {
     error_at(CUR_TOKEN->str, "not equal to \"%s\"", op);
   }
   CUR_TOKEN = CUR_TOKEN->next;
