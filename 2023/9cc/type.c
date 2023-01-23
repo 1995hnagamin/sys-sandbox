@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include "9cc.h"
 
-Type T_INT = {
+static Type T_INT = {
   TY_INT,
   NULL,
   .array_size=0,

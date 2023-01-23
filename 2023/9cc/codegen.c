@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include "9cc.h"
 
-void gen_addr(Node *node) {
+static void gen_addr(Node *node) {
   switch (node->kind) {
   case ND_LVAR:
     if (node->ty->kind == TY_FN) {
@@ -21,8 +21,8 @@ void gen_addr(Node *node) {
   }
 }
 
-int GENSYM_IDX;
-int gensym() {
+static int GENSYM_IDX;
+static int gensym() {
   return ++GENSYM_IDX;
 }
 
@@ -39,7 +39,7 @@ int nbytes_type(Type *ty) {
   }
 }
 
-void gen_if_stmt(Node *node) {
+static void gen_if_stmt(Node *node) {
   int end_label = gensym();
   gen(node->lhs);
   printf("  pop rax         # if statement\n");
@@ -59,9 +59,9 @@ void gen_if_stmt(Node *node) {
   return;
 }
 
-char *REG_NAMES[6] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
+static char *REG_NAMES[6] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
 
-void gen_fn_def(Node *def) {
+static void gen_fn_def(Node *def) {
   printf("_%.*s:\n", def->tok->len, def->tok->str);
   printf("  push rbp\n");
   printf("  mov rbp, rsp\n");
@@ -78,7 +78,7 @@ void gen_fn_def(Node *def) {
   printf("  ret\n");
 }
 
-void gen_fn_call(Node *call) {
+static void gen_fn_call(Node *call) {
   Node *arg = call->rhs;
   for (int i = 0; i < 6 && arg; ++i, arg = arg->rhs) {
     gen(arg->lhs);

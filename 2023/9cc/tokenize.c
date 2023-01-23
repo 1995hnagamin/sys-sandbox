@@ -10,7 +10,7 @@
 Token *CUR_TOKEN;
 char *INPUT_HEAD;
 
-Token *new_token(TokenKind kind, Token *cur, char *str) {
+static Token *new_token(TokenKind kind, Token *cur, char *str) {
   Token *tok = calloc(1, sizeof(Token));
   tok->kind = kind;
   tok->str = str;
@@ -42,23 +42,23 @@ void error_at(char *loc, char *fmt, ...) {
   exit(1);
 }
 
-int is_alnum(char c) {
+static int is_alnum(char c) {
   return ('a' <= c && c <= 'z')
     || ('A' <= c && c <= 'Z')
     || ('0' <= c && c <= '9')
     || (c == '_');
 }
 
-bool at_eof() {
+static bool at_eof() {
   return CUR_TOKEN->kind == TK_EOF;
 }
 
-bool is_2char_symbol(char *p) {
+static bool is_2char_symbol(char *p) {
   return strncmp(p, "<=", 2) == 0 || strncmp(p, ">=", 2) == 0
     || strncmp(p, "==", 2) == 0 || strncmp(p, "!=", 2) == 0;
 }
 
-bool is_symbol(char c) {
+static bool is_symbol(char c) {
   return c == '+' || c == '-'
     || c == '*' || c == '/'
     || c == '&'

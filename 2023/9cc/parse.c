@@ -6,13 +6,13 @@
 #include <string.h>
 #include "9cc.h"
 
-bool match_reserved_token(char *op, Token *token) {
+static bool match_reserved_token(char *op, Token *token) {
   return token->kind == TK_RESERVED
     && (int)(strlen(op)) == token->len
     && memcmp(token->str, op, token->len) == 0;
 }
 
-bool consume(char *op) {
+static bool consume(char *op) {
   if (!match_reserved_token(op, CUR_TOKEN)) {
     return false;
   }
@@ -20,7 +20,7 @@ bool consume(char *op) {
   return true;
 }
 
-Token *consume_ident() {
+static Token *consume_ident() {
   Token *ident = CUR_TOKEN;
   if (ident->kind != TK_IDENT) {
     return NULL;
@@ -29,7 +29,7 @@ Token *consume_ident() {
   return ident;
 }
 
-bool consume_tk(TokenKind tk) {
+static bool consume_tk(TokenKind tk) {
   if (CUR_TOKEN->kind != tk) {
     return false;
   }
@@ -37,21 +37,21 @@ bool consume_tk(TokenKind tk) {
   return true;
 }
 
-void expect(char *op) {
+static void expect(char *op) {
   if (!match_reserved_token(op, CUR_TOKEN)) {
     error_at(CUR_TOKEN->str, "not equal to \"%s\"", op);
   }
   CUR_TOKEN = CUR_TOKEN->next;
 }
 
-void expect_tk(TokenKind tk) {
+static void expect_tk(TokenKind tk) {
   if (CUR_TOKEN->kind != tk) {
     error_at(CUR_TOKEN->str, "unexpected token");
   }
   CUR_TOKEN = CUR_TOKEN->next;
 }
 
-int expect_number() {
+static int expect_number() {
   if (CUR_TOKEN->kind != TK_NUM) {
     error_at(CUR_TOKEN->str, "not a number");
   }
@@ -61,7 +61,7 @@ int expect_number() {
 }
 
 LVar *LOCAL_VARS;
-LVar *find_lvar(Token *tok) {
+static LVar *find_lvar(Token *tok) {
   int len = tok->len;
   for (LVar *var = LOCAL_VARS; var; var = var->next) {
     if (var->len == len && !memcmp(tok->str, var->name, len)) {
@@ -71,7 +71,7 @@ LVar *find_lvar(Token *tok) {
   return NULL;
 }
 
-LVar *new_lvar(struct LVar *next, char *name, int len, int offset) {
+static LVar *new_lvar(struct LVar *next, char *name, int len, int offset) {
   LVar *lvar = calloc(1, sizeof(LVar));
   lvar->next = next;
   lvar->name = name;
@@ -81,11 +81,11 @@ LVar *new_lvar(struct LVar *next, char *name, int len, int offset) {
   return lvar;
 }
 
-int max(int x, int y) {
+static int max(int x, int y) {
   return x > y ? x : y;
 }
 
-LVar *register_lvar(Token *name, Type *type) {
+static LVar *register_lvar(Token *name, Type *type) {
   switch (type->kind) {
   case TY_FN:
     {
@@ -104,7 +104,7 @@ LVar *register_lvar(Token *name, Type *type) {
   }
 }
 
-Node *new_node(NodeKind kind, Node *lhs, Node *rhs) {
+static Node *new_node(NodeKind kind, Node *lhs, Node *rhs) {
   Node *node = calloc(1, sizeof(Node));
   node->kind = kind;
   node->lhs = lhs;
@@ -113,21 +113,21 @@ Node *new_node(NodeKind kind, Node *lhs, Node *rhs) {
   return node;
 }
 
-Node *new_node_ident(LVar *lvar) {
+static Node *new_node_ident(LVar *lvar) {
   Node *node = calloc(1, sizeof(Node));
   node->kind = ND_LVAR;
   node->lvar = lvar;
   return node;
 }
 
-Node *new_node_num(int val) {
+static Node *new_node_num(int val) {
   Node *node = calloc(1, sizeof(Node));
   node->kind = ND_INT;
   node->val = val;
   return node;
 }
 
-Node *decay(Node *node) {
+static Node *decay(Node *node) {
   set_type(node);
   switch (node->ty->kind) {
   case TY_ARRAY:
@@ -137,26 +137,26 @@ Node *decay(Node *node) {
   }
 }
 
-void program();
-Node *stmt();
-Node *declaration();
-Node *declarator(Type *ty_spec);
-Node *expr();
-Node *assign();
-Node *equality();
-Node *relational();
-Node *add();
-Node *mul();
-Node *unary();
-Node *postfix();
-Node *primary();
+static void program();
+static Node *stmt();
+static Node *declaration();
+static Node *declarator(Type *ty_spec);
+static Node *expr();
+static Node *assign();
+static Node *equality();
+static Node *relational();
+static Node *add();
+static Node *mul();
+static Node *unary();
+static Node *postfix();
+static Node *primary();
 
 void parse() {
   program();
 }
 
 Node *code[100];
-void program() {
+static void program() {
   int i = 0;
   while (consume_tk(TK_INT)) {
     Token *fn_name = consume_ident();
@@ -184,7 +184,7 @@ void program() {
   code[i] = NULL;
 }
 
-Node *stmt() {
+static Node *stmt() {
   if (consume_tk(TK_IF)) {
     expect("(");
     Node *cond = expr();
@@ -226,11 +226,11 @@ Node *stmt() {
   return node;
 }
 
-Node *expr() {
+static Node *expr() {
   return assign();
 }
 
-Node *assign() {
+static Node *assign() {
   Node *node = equality();
   if (consume("=")) {
     node = new_node(ND_ASSIGN, node, assign());
@@ -238,7 +238,7 @@ Node *assign() {
   return node;
 }
 
-Node *equality() {
+static Node *equality() {
   Node *node = relational();
   for (;;) {
     if (consume("==")) {
@@ -251,19 +251,19 @@ Node *equality() {
   }
 }
 
-Node *declaration_sub() {
+static Node *declaration_sub() {
   consume_tk(TK_INT);
   Node *node = declarator(ty_int());
   return node;
 }
 
-Node *declaration() {
+static Node *declaration() {
   Node *node = declaration_sub();
   expect(";");
   return node;
 }
 
-Node *direct_declarator(Type *spec_type) {
+static Node *direct_declarator(Type *spec_type) {
   Token *var_name = consume_ident();
   Node *ident = new_node_ident(NULL);
   ident->tok = var_name;
@@ -309,7 +309,7 @@ Node *direct_declarator(Type *spec_type) {
 /*
   int *x[5] => int *(x[5]) ... [5] * int
  */
-Node *declarator(Type *ty_spec) {
+static Node *declarator(Type *ty_spec) {
   if (consume("*")) {
     Node *node = declarator(new_ty_ptr(ty_spec));
     return node;
@@ -317,7 +317,7 @@ Node *declarator(Type *ty_spec) {
   return direct_declarator(ty_spec);
 }
 
-Node *relational() {
+static Node *relational() {
   Node *node = add();
   for (;;) {
     if (consume("<=")) {
@@ -334,7 +334,7 @@ Node *relational() {
   }
 }
 
-Node *add() {
+static Node *add() {
   Node *node = mul();
   for (;;) {
     if (consume("+")) {
@@ -347,7 +347,7 @@ Node *add() {
   }
 }
 
-Node *mul() {
+static Node *mul() {
   if (consume_tk(TK_SIZEOF)) {
     Node *exp = unary();
     set_type(exp);
@@ -367,7 +367,7 @@ Node *mul() {
   }
 }
 
-Node *unary() {
+static Node *unary() {
   if (consume("+")) {
     return decay(primary());
   } else if (consume("-")) {
@@ -376,7 +376,7 @@ Node *unary() {
   return postfix();
 }
 
-Node *postfix() {
+static Node *postfix() {
   Node *node = primary();
   while (consume("[")) {
     Node *idx = expr();
@@ -388,7 +388,7 @@ Node *postfix() {
   return node;
 }
 
-Node *primary() {
+static Node *primary() {
   if (consume("(")) {
     Node *node = expr();
     expect(")");
