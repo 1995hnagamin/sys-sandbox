@@ -6,6 +6,9 @@
 void gen_addr(Node *node) {
   switch (node->kind) {
   case ND_LVAR:
+    if (node->ty->kind == TY_FN) {
+      break;
+    }
     printf("  mov rax, rbp\n");
     printf("  sub rax, %d      # get lval: offset %d\n", node->lvar->offset, node->lvar->offset);
     printf("  push rax\n");
@@ -29,6 +32,8 @@ int nbytes_type(Type *ty) {
     return sizeof(int);
   case TY_ARRAY:
     return nbytes_type(ty->ptr_to) * ty->array_size;
+  case TY_FN:
+    error("The sizeof operator shall not be applied to an expression that has function type.");
   case TY_PTR:
     return sizeof(int*);
   }

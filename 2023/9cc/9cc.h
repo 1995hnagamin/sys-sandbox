@@ -31,12 +31,13 @@ struct Type {
   } kind;
   struct Type *ptr_to;
   size_t array_size; // valid if kind == TY_ARRAY
+  struct Node *params;
 };
 typedef struct Type Type;
 
 Type *ty_int();
 Type *new_ty_array(size_t n, Type *to);
-Type *new_ty_fn(Type *ret);
+Type *new_ty_fn(struct Node *params, Type *ret);
 Type *new_ty_ptr(Type *to);
 
 typedef enum {

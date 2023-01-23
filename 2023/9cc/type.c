@@ -5,7 +5,8 @@
 Type T_INT = {
   TY_INT,
   NULL,
-  0,
+  .array_size=0,
+  .params=NULL,
 };
 
 Type *ty_int() {
@@ -20,9 +21,10 @@ Type *new_ty_array(size_t n, Type *to) {
   return t;
 }
 
-Type *new_ty_fn(Type *ret) {
+Type *new_ty_fn(struct Node *params, Type *ret) {
   Type *t = calloc(1, sizeof(Type));
   t->kind = TY_FN;
+  t->params = params;
   t->ptr_to = ret;
   return t;
 }

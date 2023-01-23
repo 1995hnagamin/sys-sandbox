@@ -86,10 +86,22 @@ int max(int x, int y) {
 }
 
 LVar *register_lvar(Token *name, Type *type) {
-  int offset = LOCAL_VARS->offset + max(8, nbytes_type(type));
-  LVar *lvar = new_lvar(LOCAL_VARS, name->str, name->len, offset);
-  LOCAL_VARS = lvar;
-  return lvar;
+  switch (type->kind) {
+  case TY_FN:
+    {
+      // just a function declaration
+      LVar *lvar = new_lvar(LOCAL_VARS, name->str, name->len, -10000);
+      LOCAL_VARS = lvar;
+      return lvar;
+    }
+  default:
+    {
+      int offset = LOCAL_VARS->offset + max(8, nbytes_type(type));
+      LVar *lvar = new_lvar(LOCAL_VARS, name->str, name->len, offset);
+      LOCAL_VARS = lvar;
+      return lvar;
+    }
+  }
 }
 
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs) {
@@ -265,8 +277,20 @@ Node *direct_declarator(Type *spec_type) {
         tail->ptr_to = arr;
         tail = arr;
       } else if (consume("(")) {
-        expect(")");
-        Type *fn = new_ty_fn(spec_type);
+        Node params = { .lhs=NULL, .rhs=NULL,};
+        Node *node = &params;
+        while (!consume(")")) {
+          expect_tk(TK_INT);
+          Token *name = consume_ident();
+          node->rhs = new_node(ND_INVALID, NULL, NULL);
+          node = node->rhs;
+          // don't set offsets at this time
+          LVar *lvar = new_lvar(LOCAL_VARS, name->str, name->len, -10000);
+          lvar->ty = ty_int();
+          node->lhs = new_node_ident(lvar);
+          consume(",");
+        }
+        Type *fn = new_ty_fn(params.rhs, spec_type);
         tail->ptr_to = fn;
         tail = fn;
       } else {
