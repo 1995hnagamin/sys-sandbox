@@ -255,8 +255,8 @@ Node *direct_declarator(Type *spec_type) {
   Token *var_name = consume_ident();
   Node *ident = new_node_ident(NULL);
   ident->tok = var_name;
-  Type parent = { .kind=TY_PTR, .ptr_to=spec_type };
-  Type *tail = &parent;
+  Type root = { .kind=TY_PTR, .ptr_to=spec_type };
+  Type *tail = &root;
   for (;;) {
       if (consume("[")) {
         int num = expect_number();
@@ -264,11 +264,16 @@ Node *direct_declarator(Type *spec_type) {
         Type *arr = new_ty_array(num, spec_type);
         tail->ptr_to = arr;
         tail = arr;
+      } else if (consume("(")) {
+        expect(")");
+        Type *fn = new_ty_fn(spec_type);
+        tail->ptr_to = fn;
+        tail = fn;
       } else {
         break;
       }
   }
-  Type *type = parent.ptr_to;
+  Type *type = root.ptr_to;
   LVar *lvar = register_lvar(var_name, type);
   lvar->ty = type;
   ident->lvar = lvar;

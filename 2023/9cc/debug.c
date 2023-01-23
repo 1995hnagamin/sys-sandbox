@@ -15,6 +15,11 @@ void view_type(Type *type) {
     view_type(type->ptr_to);
     fprintf(stderr, ")");
     break;
+  case TY_FN:
+    fprintf(stderr, "(function ");
+    view_type(type->ptr_to);
+    fprintf(stderr, ")");
+    break;
   case TY_PTR:
     fprintf(stderr, "(pointer ");
     view_type(type->ptr_to);

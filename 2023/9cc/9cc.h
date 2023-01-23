@@ -26,6 +26,7 @@ struct Type {
   enum {
     TY_INT,
     TY_ARRAY,
+    TY_FN,
     TY_PTR,
   } kind;
   struct Type *ptr_to;
@@ -35,6 +36,7 @@ typedef struct Type Type;
 
 Type *ty_int();
 Type *new_ty_array(size_t n, Type *to);
+Type *new_ty_fn(Type *ret);
 Type *new_ty_ptr(Type *to);
 
 typedef enum {

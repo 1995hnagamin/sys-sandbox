@@ -20,6 +20,13 @@ Type *new_ty_array(size_t n, Type *to) {
   return t;
 }
 
+Type *new_ty_fn(Type *ret) {
+  Type *t = calloc(1, sizeof(Type));
+  t->kind = TY_FN;
+  t->ptr_to = ret;
+  return t;
+}
+
 Type *new_ty_ptr(Type *to) {
   Type *t = calloc(1, sizeof(Type));
   t->kind = TY_PTR;
