@@ -239,9 +239,14 @@ Node *equality() {
   }
 }
 
-Node *declaration() {
+Node *declaration_sub() {
   consume_tk(TK_INT);
   Node *node = declarator(ty_int());
+  return node;
+}
+
+Node *declaration() {
+  Node *node = declaration_sub();
   expect(";");
   return node;
 }
