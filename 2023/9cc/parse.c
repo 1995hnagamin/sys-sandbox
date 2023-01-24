@@ -61,6 +61,13 @@ static int expect_number() {
 }
 
 LVar *LOCAL_VARS;
+LVar EMPTY_ENV = {
+  .next = NULL,
+  .name = "",
+  .len = 0,
+  .offset = 0,
+  .ty = NULL,
+};
 static LVar *find_lvar(Token *tok) {
   int len = tok->len;
   for (LVar *var = LOCAL_VARS; var; var = var->next) {
@@ -160,7 +167,7 @@ static void program() {
   int i = 0;
   while (consume_tk(TK_INT)) {
     Token *fn_name = consume_ident();
-    LOCAL_VARS = new_lvar(NULL, "", 0, 0);
+    LOCAL_VARS = &EMPTY_ENV;
     Node *def = new_node(ND_FNDEF, NULL, NULL);
     def->tok = fn_name;
     expect("(");
