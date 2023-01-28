@@ -98,6 +98,7 @@ extern LVar *LOCAL_VARS;
 extern Node *code[100];
 void parse();
 
+void view_token(Token *tok);
 void view_node(Node *node);
 
 int nbytes_type(Type *ty);

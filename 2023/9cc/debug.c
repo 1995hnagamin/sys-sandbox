@@ -2,6 +2,10 @@
 #include <stdlib.h>
 #include "9cc.h"
 
+void view_token(Token *tok) {
+  fprintf(stderr, "%.*s (%d)\n", tok->len, tok->str, tok->len);
+}
+
 void view_type(Type *type) {
   if (!type) {
     return;
