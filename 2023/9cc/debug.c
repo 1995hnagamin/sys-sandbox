@@ -44,6 +44,10 @@ void view_node(Node *node) {
     fprintf(stderr, "[%d]", node->lvar->offset);
     return;
   }
+  if (node->kind == ND_GVAR) {
+    fprintf(stderr, "[global:%.*s]", node->gvar->len, node->gvar->name);
+    return;
+  }
   if (node->kind == ND_FNDEF) {
     fprintf(stderr, "(fndef ");
     fprintf(stderr, "%.*s ", node->tok->len, node->tok->str);

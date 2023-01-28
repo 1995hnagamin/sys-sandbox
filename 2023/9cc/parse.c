@@ -61,11 +61,18 @@ static int expect_number() {
 }
 
 LVar *LOCAL_VARS;
-LVar EMPTY_ENV = {
+LVar EMPTY_LENV = {
   .next = NULL,
   .name = "",
   .len = 0,
   .offset = 0,
+  .ty = NULL,
+};
+GVar *GLOBAL_VARS;
+GVar EMPTY_GENV = {
+  .next = NULL,
+  .name = "",
+  .len = 0,
   .ty = NULL,
 };
 static LVar *find_lvar(Token *tok) {
@@ -86,6 +93,15 @@ static LVar *new_lvar(struct LVar *next, char *name, int len, int offset) {
   lvar->offset = offset;
   lvar->ty = NULL;
   return lvar;
+}
+
+static GVar *new_gvar(struct GVar *next, char *name, int len) {
+  GVar *gvar = calloc(1, sizeof(LVar));
+  gvar->next = next;
+  gvar->name = name;
+  gvar->len = len;
+  gvar->ty = NULL;
+  return gvar;
 }
 
 static int max(int x, int y) {
@@ -162,14 +178,31 @@ void parse() {
   program();
 }
 
+Token *toplevel_decl() {
+  if (!consume_tk(TK_INT)) {
+    return NULL;
+  }
+  Token *name = consume_ident();
+  return name;
+}
+
 Node *code[100];
 static void program() {
+  GLOBAL_VARS = &EMPTY_GENV;
   int i = 0;
-  while (consume_tk(TK_INT)) {
-    Token *fn_name = consume_ident();
-    LOCAL_VARS = &EMPTY_ENV;
+  Token *name;
+  while ((name = toplevel_decl())) {
+    if (consume(";")) {
+      // global variable
+      Node *gvar = new_node(ND_GVAR, NULL, NULL);
+      gvar->gvar = new_gvar(GLOBAL_VARS, name->str, name->len);
+      GLOBAL_VARS = gvar->gvar;
+      code[i++] = gvar;
+      continue;
+    }
+    LOCAL_VARS = &EMPTY_LENV;
     Node *def = new_node(ND_FNDEF, NULL, NULL);
-    def->tok = fn_name;
+    def->tok = name;
     expect("(");
     Node *node = def;
     while (!consume(")")) {

@@ -110,6 +110,10 @@ void gen(Node *node) {
     printf("  mov rax, [rax]\n");
     printf("  push rax\n");
     return;
+  case ND_GVAR:
+    printf("%.*s:\n", node->gvar->len, node->gvar->name);
+    printf("  .zero 4\n");
+    break;
   case ND_IF:
     gen_if_stmt(node);
     return;

@@ -60,6 +60,7 @@ typedef enum {
   ND_DEREF, // *
   ND_INT, // integers
   ND_LVAR, // local variables
+  ND_GVAR, // global variables
   ND_BLOCK, // compound statements
 } NodeKind;
 
@@ -69,6 +70,7 @@ struct Node {
   struct Node *rhs;
   int val; // valid if kind == ND_INT
   struct LVar *lvar; // valid if kind == ND_LVAR
+  struct GVar *gvar;
   Token *tok; // valid if kind == ND_FNCALL
   struct Type *ty;
 };
@@ -85,6 +87,14 @@ struct LVar {
   Type *ty;
 };
 typedef struct LVar LVar;
+
+struct GVar {
+  struct GVar *next;
+  char *name;
+  int len;
+  Type *ty;
+};
+typedef struct GVar GVar;
 
 extern Token *CUR_TOKEN;
 extern char *INPUT_HEAD;
