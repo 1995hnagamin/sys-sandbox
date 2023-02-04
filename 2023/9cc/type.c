@@ -62,6 +62,7 @@ void set_type(Node *node) {
     break;
   case ND_GVAR:
     node->ty = &T_INT;
+    break;
   case ND_IF:
     set_type(node->lhs);
     set_type(node->rhs->lhs);

@@ -13,6 +13,11 @@ static void gen_addr(Node *node) {
     printf("  sub rax, %d      # get lval: offset %d\n", node->lvar->offset, node->lvar->offset);
     printf("  push rax\n");
     break;
+  case ND_GVAR:
+    printf("  mov rax, qword ptr %.*s@GOTPCREL[rip]\n",
+      node->gvar->len, node->gvar->name);
+    printf("  push rax\n");
+    break;
   case ND_DEREF:
     gen(node->lhs);
     break;
@@ -99,6 +104,10 @@ void gen(Node *node) {
     gen_fn_def(node);
     return;
   case ND_DECL:
+    if (node->gvar) {
+      printf(".comm  %.*s, 4, 2\n", node->gvar->len, node->gvar->name);
+      break;
+    }
     printf("  push 0          # dummy instruction\n");
     break;
   case ND_INT:
@@ -111,8 +120,10 @@ void gen(Node *node) {
     printf("  push rax\n");
     return;
   case ND_GVAR:
-    printf("%.*s:\n", node->gvar->len, node->gvar->name);
-    printf("  .zero 4\n");
+    gen_addr(node);
+    printf("  pop rax         # pop address to rax \n");
+    printf("  mov rax, [rax]\n");
+    printf("  push rax\n");
     break;
   case ND_IF:
     gen_if_stmt(node);
@@ -120,6 +131,8 @@ void gen(Node *node) {
   case ND_ASSIGN:
     printf("  # ND_ASSIGN\n");
     if (node->lhs->kind == ND_LVAR) {
+      gen_addr(node->lhs);
+    } else if (node->lhs->kind == ND_GVAR) {
       gen_addr(node->lhs);
     } else {
       // node->lhs =  *p

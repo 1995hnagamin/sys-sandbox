@@ -75,9 +75,20 @@ GVar EMPTY_GENV = {
   .len = 0,
   .ty = NULL,
 };
+
 static LVar *find_lvar(Token *tok) {
   int len = tok->len;
   for (LVar *var = LOCAL_VARS; var; var = var->next) {
+    if (var->len == len && !memcmp(tok->str, var->name, len)) {
+      return var;
+    }
+  }
+  return NULL;
+}
+
+static GVar *find_gvar(Token *tok) {
+  int len = tok->len;
+  for (GVar *var = GLOBAL_VARS; var; var = var->next) {
     if (var->len == len && !memcmp(tok->str, var->name, len)) {
       return var;
     }
@@ -143,6 +154,13 @@ static Node *new_node_ident(LVar *lvar) {
   return node;
 }
 
+static Node *new_node_gvar(GVar *gvar) {
+  Node *node = calloc(1, sizeof(Node));
+  node->kind = ND_GVAR;
+  node->gvar = gvar;
+  return node;
+}
+
 static Node *new_node_num(int val) {
   Node *node = calloc(1, sizeof(Node));
   node->kind = ND_INT;
@@ -194,10 +212,12 @@ static void program() {
   while ((name = toplevel_decl())) {
     if (consume(";")) {
       // global variable
-      Node *gvar = new_node(ND_GVAR, NULL, NULL);
-      gvar->gvar = new_gvar(GLOBAL_VARS, name->str, name->len);
-      GLOBAL_VARS = gvar->gvar;
-      code[i++] = gvar;
+      GVar *gvar = new_gvar(GLOBAL_VARS, name->str, name->len);
+      GLOBAL_VARS = gvar;
+      Node *decl = new_node(ND_DECL, NULL, NULL);
+      decl->tok = name;
+      decl->gvar = gvar;
+      code[i++] = decl;
       continue;
     }
     LOCAL_VARS = &EMPTY_LENV;
@@ -462,6 +482,10 @@ static Node *primary() {
   LVar *lvar = find_lvar(tok);
   if (lvar) {
     return new_node_ident(lvar);
+  }
+  GVar *gvar = find_gvar(tok);
+  if (gvar) {
+    return new_node_gvar(gvar);
   }
   // error: variable used before declaration
   error_at(CUR_TOKEN->str, "undeclared variable: %.*s\n", tok->len, tok->str);
