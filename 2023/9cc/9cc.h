@@ -42,7 +42,6 @@ struct Type {
 typedef struct Type Type;
 
 Type *ty_reserved(TypeKind tyk);
-Type *ty_int();
 Type *new_ty_array(size_t n, Type *to);
 Type *new_ty_fn(struct Node *params, Type *ret);
 Type *new_ty_ptr(Type *to);

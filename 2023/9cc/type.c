@@ -9,10 +9,6 @@ static Type T_CHAR = {
   .params = NULL,
 };
 
-Type *ty_char() {
-  return &T_CHAR;
-}
-
 static Type T_INT = {
   TY_INT,
   NULL,
@@ -20,16 +16,12 @@ static Type T_INT = {
   .params=NULL,
 };
 
-Type *ty_int() {
-  return &T_INT;
-}
-
 Type *ty_reserved(TypeKind tyk) {
   switch (tyk) {
-    case TY_INT:
-      return ty_int();
     case TY_CHAR:
-      return ty_char();
+      return &T_CHAR;
+    case TY_INT:
+      return &T_INT;
     default:
       error("not a fundamental type");
       return NULL;
@@ -100,7 +92,7 @@ void set_type(Node *node) {
     for (Node *arg = node->rhs; arg; arg = arg->rhs) {
       set_type(arg->lhs);
     }
-    node->ty = ty_int();
+    node->ty = ty_reserved(TY_INT);
     break;
   case ND_RETURN:
     set_type(node->lhs);
@@ -119,14 +111,14 @@ void set_type(Node *node) {
     } else if (node->rhs->ty->kind == TY_PTR) {
       node->ty = node->rhs->ty;
     } else {
-      node->ty = ty_int();
+      node->ty = ty_reserved(TY_INT);
     }
     break;
   case ND_MUL:
   case ND_DIV:
     set_type(node->lhs);
     set_type(node->rhs);
-    node->ty = ty_int();
+    node->ty = ty_reserved(TY_INT);
     break;
   case ND_EQU:
   case ND_NEQ:
@@ -134,7 +126,7 @@ void set_type(Node *node) {
   case ND_LEQ:
     set_type(node->lhs);
     set_type(node->rhs);
-    node->ty = ty_int();
+    node->ty = ty_reserved(TY_INT);
     break;
   case ND_ADDR:
     set_type(node->lhs);
