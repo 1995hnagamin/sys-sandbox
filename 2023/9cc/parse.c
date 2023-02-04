@@ -123,7 +123,8 @@ static LVar *register_lvar(Token *name, Type *type) {
   if (type->kind == TY_FN) {
     error("a function declaration does not declare local variables");
   }
-  int offset = LOCAL_VARS->offset + max(8, nbytes_type(type));
+  int min_offset = LOCAL_VARS->offset + nbytes_type(type);
+  int offset = (min_offset + 7) & (-8);
   LVar *lvar = new_lvar(LOCAL_VARS, name->str, name->len, offset);
   lvar->ty = type;
   LOCAL_VARS = lvar;
