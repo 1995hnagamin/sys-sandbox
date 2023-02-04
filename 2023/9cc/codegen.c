@@ -140,7 +140,11 @@ void gen(Node *node) {
   case ND_LVAR:
     gen_addr(node);
     printf("  pop rax         # pop address to rax \n");
-    printf("  mov rax, [rax]\n");
+    if (node->ty->kind == TY_CHAR) {
+      printf("  movsx eax, byte ptr [rax]\n");
+    } else {
+      printf("  mov rax, [rax]\n");
+    }
     printf("  push rax\n");
     return;
   case ND_GVAR:
@@ -165,7 +169,11 @@ void gen(Node *node) {
     gen(node->rhs);
     printf("  pop rdi         # pop rhs to rdi\n");
     printf("  pop rax         # pop address to rax\n");
-    printf("  mov [rax], rdi\n");
+    if (node->lhs->ty->kind == TY_CHAR) {
+      printf("  mov byte ptr [rax], dil\n");
+    } else {
+      printf("  mov [rax], rdi\n");
+    }
     printf("  push rdi\n");
     return;
   case ND_FNCALL:
@@ -278,7 +286,11 @@ void gen(Node *node) {
   case ND_DEREF:
     gen(node->lhs);
     printf("  pop rax\n");
-    printf("  mov rax, [rax]\n");
+    if (node->ty->kind == TY_CHAR) {
+      printf("  movsx eax, byte ptr [rax]\n");
+    } else {
+      printf("  mov rax, [rax]\n");
+    }
     printf("  push rax\n");
     break;
   case ND_INVALID:
