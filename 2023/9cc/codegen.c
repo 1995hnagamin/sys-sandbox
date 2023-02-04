@@ -44,6 +44,20 @@ int nbytes_type(Type *ty) {
   }
 }
 
+int alignment_of(Type *ty) {
+  switch (ty->kind)
+  {
+  case TY_INT:
+    return sizeof(int);
+  case TY_ARRAY:
+    return alignment_of(ty->ptr_to);
+  case TY_FN:
+    error("An expression of function type cannot be aligned.");
+  case TY_PTR:
+    return sizeof(int*);
+  }
+}
+
 static void gen_if_stmt(Node *node) {
   int end_label = gensym();
   gen(node->lhs);
@@ -105,7 +119,10 @@ void gen(Node *node) {
     return;
   case ND_DECL:
     if (node->gvar) {
-      printf(".comm  %.*s, 4, 2\n", node->gvar->len, node->gvar->name);
+      printf(".comm  %.*s, %d, %d\n",
+        node->gvar->len, node->gvar->name,
+        nbytes_type(node->gvar->ty),
+        alignment_of(node->gvar->ty));
       break;
     }
     printf("  push 0          # dummy instruction\n");
