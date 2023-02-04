@@ -1,9 +1,10 @@
 program = fndef*;
 
-fndef = "int" ident "(" params? ")" "{" stmt* "}";
+fndef = arithtype ident "(" params? ")" "{" stmt* "}";
 
-params = "int" ident
-       | "int" ident "," params;
+params = arithtype ident
+       | arithtype ident "," params
+       ;
 
 stmt = expr ";"
      | "if" "(" expr ")" stmt ("else" stmt)?
@@ -11,7 +12,7 @@ stmt = expr ";"
      | "{" (stmt | declaration)* "}"
      ;
 
-declaration = "int" declarator ";";
+declaration = arithtype declarator ";";
 
 declarators = ident
             | "*" declarator
@@ -41,3 +42,7 @@ primary = num
         | "&" unary
         | "*" unary
         | "(" expr ")";
+
+arithtype = "int" 
+          | "char"
+          ;
