@@ -1,1 +1,6 @@
-int main() { int a; a=10; foo(); return a; }
+int main() {
+  int a;
+  a = 10;
+  foo();
+  return a;
+}

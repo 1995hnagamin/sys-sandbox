@@ -1,1 +1,4 @@
-int main() { int *y; return sizeof(y); }
+int main() {
+  int* y;
+  return sizeof(y);
+}

@@ -1,1 +1,5 @@
-int main() { if (1 >= 0) return 15; return 20; }
+int main() {
+  if (1 >= 0)
+    return 15;
+  return 20;
+}

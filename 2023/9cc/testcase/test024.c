@@ -1,1 +1,3 @@
-int main() { return 0>16; }
+int main() {
+  return 0>16;
+}

@@ -1,1 +1,5 @@
-int main() { char *s; s = "Aa"; return s[1] - s[0]; }
+int main() {
+  char* s;
+  s = "Aa";
+  return s[1] - s[0];
+}
