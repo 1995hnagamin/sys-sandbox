@@ -120,22 +120,14 @@ static int max(int x, int y) {
 }
 
 static LVar *register_lvar(Token *name, Type *type) {
-  switch (type->kind) {
-  case TY_FN:
-    {
-      // just a function declaration
-      LVar *lvar = new_lvar(LOCAL_VARS, name->str, name->len, -10000);
-      LOCAL_VARS = lvar;
-      return lvar;
-    }
-  default:
-    {
-      int offset = LOCAL_VARS->offset + max(8, nbytes_type(type));
-      LVar *lvar = new_lvar(LOCAL_VARS, name->str, name->len, offset);
-      LOCAL_VARS = lvar;
-      return lvar;
-    }
+  if (type->kind == TY_FN) {
+    error("a function declaration does not declare local variables");
   }
+  int offset = LOCAL_VARS->offset + max(8, nbytes_type(type));
+  LVar *lvar = new_lvar(LOCAL_VARS, name->str, name->len, offset);
+  lvar->ty = type;
+  LOCAL_VARS = lvar;
+  return lvar;
 }
 
 static Node *new_node(NodeKind kind, Node *lhs, Node *rhs) {
@@ -263,7 +255,12 @@ static Node *stmt() {
     return nif;
   }
   if (CUR_TOKEN->kind == TK_INT) {
-    return declaration();
+    Node *decl = declaration();
+    if (decl->ty->kind != TY_FN) {
+      LVar *lvar = register_lvar(decl->tok, decl->ty);
+      decl->lhs->lvar = lvar;
+    }
+    return decl;
   }
   Node *node;
   if (consume("{")) {
@@ -357,12 +354,9 @@ static Node *direct_declarator(Type *spec_type) {
         break;
       }
   }
-  Type *type = root.ptr_to;
-  LVar *lvar = register_lvar(var_name, type);
-  lvar->ty = type;
-  ident->lvar = lvar;
   Node *decl = new_node(ND_DECL, ident, NULL);
   decl->tok = var_name;
+  decl->ty = root.ptr_to;
   return decl;
 }
 
