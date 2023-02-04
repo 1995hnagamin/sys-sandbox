@@ -12,6 +12,7 @@ typedef enum {
   TK_RESERVED,
   TK_IDENT,
   TK_NUM,
+  TK_STR,
   TK_EOF,
 } TokenKind;
 
@@ -65,6 +66,7 @@ typedef enum {
   ND_ADDR, // &
   ND_DEREF, // *
   ND_INT, // integers
+  ND_STR,
   ND_LVAR, // local variables
   ND_GVAR, // global variables
   ND_BLOCK, // compound statements
@@ -105,6 +107,15 @@ typedef struct GVar GVar;
 extern Token *CUR_TOKEN;
 extern char *INPUT_HEAD;
 
+struct StrLit {
+  struct StrLit *next;
+  char *str;
+  int len;
+  int idx;
+};
+typedef struct StrLit StrLit;
+extern StrLit *STR_LIT;
+
 void error(char *fmt, ...);
 void error_at(char *loc, char *fmt, ...);
 
@@ -118,6 +129,7 @@ void view_token(Token *tok);
 void view_node(Node *node);
 
 int nbytes_type(Type *ty);
+void gen_str_lit();
 void gen(Node *node);
 
 #endif

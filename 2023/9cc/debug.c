@@ -46,6 +46,10 @@ void view_node(Node *node) {
     fprintf(stderr, "%d", node->val);
     return;
   }
+  if (node->kind == ND_STR) {
+    fprintf(stderr, "\"%.*s\"", node->tok->len, node->tok->str);
+    return;
+  }
   if (node->kind == ND_LVAR) {
     fprintf(stderr, "[%d]", node->lvar->offset);
     return;

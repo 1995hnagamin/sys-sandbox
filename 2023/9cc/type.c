@@ -72,6 +72,9 @@ void set_type(Node *node) {
   case ND_INT:
     node->ty = &T_INT;
     break;
+  case ND_STR:
+    node->ty = new_ty_array(node->tok->len+1, &T_CHAR);
+    break;
   case ND_LVAR:
     node->ty = node->lvar->ty;
     break;

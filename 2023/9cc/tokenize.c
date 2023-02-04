@@ -133,6 +133,13 @@ Token *tokenize(char *p) {
       cur->val = strtol(p, &p, 10);
       continue;
     }
+    if (*p == '"') {
+      char *start = ++p;
+      cur = new_token(TK_STR, cur, start);
+      while (*p != '"') { ++p; }
+      cur->len = (p++) - start;
+      continue;
+    }
     error_at(p, "tokenization failed");
   }
   new_token(TK_EOF, cur, p);

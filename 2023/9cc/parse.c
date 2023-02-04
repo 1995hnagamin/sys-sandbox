@@ -60,6 +60,15 @@ static int expect_number() {
   return val;
 }
 
+static Token *expect_string() {
+  if (CUR_TOKEN->kind != TK_STR) {
+    error_at(CUR_TOKEN->str, "not a string");
+  }
+  Token *tok = CUR_TOKEN;
+  CUR_TOKEN = CUR_TOKEN->next;
+  return tok;
+}
+
 LVar *LOCAL_VARS;
 LVar EMPTY_LENV = {
   .next = NULL,
@@ -178,6 +187,24 @@ static Node *decay(Node *node) {
   }
 }
 
+StrLit *STR_LIT;
+StrLit EMPTY_STR_LIT = {
+  .next = NULL,
+  .str = "",
+  .len = 0,
+  .idx = 0,
+};
+
+static StrLit *register_string_literal(Token *tok) {
+  StrLit *lit = calloc(1, sizeof(StrLit));
+  lit->str = tok->str;
+  lit->len = tok->len;
+  lit->idx = STR_LIT->idx + 1;
+  lit->next = STR_LIT;
+  STR_LIT = lit;
+  return lit;
+}
+
 static void program();
 static Node *stmt();
 static Node *declaration();
@@ -239,6 +266,7 @@ Token *toplevel_decl() {
 Node *code[100];
 static void program() {
   GLOBAL_VARS = &EMPTY_GENV;
+  STR_LIT = &EMPTY_STR_LIT;
   int i = 0;
   while (seek_reserved_type()) {
     Token *name = skip_to_identifier();
@@ -495,11 +523,19 @@ static Node *primary() {
     Node *node = unary();
     return new_node(ND_DEREF, decay(node), NULL);
   }
-  Token *tok = consume_ident();
-  if (!tok) {
+  if (CUR_TOKEN->kind == TK_NUM) {
     // should be a number
     return new_node_num(expect_number());
   }
+  if (CUR_TOKEN->kind == TK_STR) {
+    Node *node = calloc(1, sizeof(Node));
+    node->kind = ND_STR;
+    node->tok = expect_string();
+    StrLit *strl = register_string_literal(node->tok);
+    node->val = strl->idx;
+    return node;
+  }
+  Token *tok = consume_ident();
   if (consume("(")) {
     // shoule be a function call
     Node *call = new_node(ND_FNCALL, NULL, NULL);

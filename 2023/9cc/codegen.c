@@ -137,6 +137,10 @@ void gen(Node *node) {
   case ND_INT:
     printf("  push %d          # integer\n", node->val);
     return;
+  case ND_STR:
+    printf("  lea rax, qword ptr [L_.str.%d + rip]\n", node->val);
+    printf("  push rax\n");
+    break;
   case ND_LVAR:
     gen_addr(node);
     printf("  pop rax         # pop address to rax \n");
@@ -296,5 +300,12 @@ void gen(Node *node) {
   case ND_INVALID:
     fprintf(stderr, "fatal error in gen()\n");
     exit(1);
+  }
+}
+
+void gen_str_lit() {
+  for (StrLit *strl = STR_LIT; strl; strl = strl->next) {
+    printf("L_.str.%d:\n", strl->idx);
+    printf("  .asciz \"%.*s\"\n", strl->len, strl->str);
   }
 }

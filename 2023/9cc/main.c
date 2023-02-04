@@ -8,13 +8,14 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  printf(".intel_syntax noprefix\n");
-  printf(".globl _main\n");
 
   INPUT_HEAD = argv[1];
   CUR_TOKEN = tokenize(INPUT_HEAD);
   parse();
 
+  printf(".intel_syntax noprefix\n");
+  gen_str_lit();
+  printf(".globl _main\n");
   for (int i = 0; code[i]; ++i) {
     view_node(code[i]);
     fprintf(stderr, "\n");

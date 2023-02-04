@@ -75,5 +75,6 @@ assert 19 'int *p; int main() { int a; p = &a; *p = 19; return a; }'
 assert  3 'int main() { char x[3]; x[0] = -1; x[1] = 2; int y; y = 4; return x[0] + y; }'
 assert  3 'int main() { char x[13]; int y; y = 4; x[0] = 100; x[1] = -1; x[7] = 100; x[8] = 100; x[9] = 100; x[10] = 100; return x[1] + y; }'
 assert 11 'int main() { char x[50]; x[36] = -1; x[37] = 11; x[38] = -1; return x[37];  }'
+assert 32 'int main() { char *s; s = "Aa"; return s[1] - s[0]; }'
 
 echo OK

@@ -38,6 +38,7 @@ postfix = primary
         | postfix "[" expr "]";
 
 primary = num
+        | "\"" char* "\""
         | ident ( "("  ")" )?
         | "&" unary
         | "*" unary
