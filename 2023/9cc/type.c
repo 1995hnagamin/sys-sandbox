@@ -2,6 +2,17 @@
 #include <stdlib.h>
 #include "9cc.h"
 
+static Type T_CHAR = {
+  TY_CHAR,
+  NULL,
+  .array_size = 0,
+  .params = NULL,
+};
+
+Type *ty_char() {
+  return &T_CHAR;
+}
+
 static Type T_INT = {
   TY_INT,
   NULL,
@@ -11,6 +22,18 @@ static Type T_INT = {
 
 Type *ty_int() {
   return &T_INT;
+}
+
+Type *ty_reserved(TypeKind tyk) {
+  switch (tyk) {
+    case TY_INT:
+      return ty_int();
+    case TY_CHAR:
+      return ty_char();
+    default:
+      error("not a fundamental type");
+      return NULL;
+  }
 }
 
 Type *new_ty_array(size_t n, Type *to) {

@@ -79,6 +79,11 @@ Token *tokenize(char *p) {
       p++;
       continue;
     }
+    if (strncmp("char", p, 4) == 0 && !is_alnum(p[4])) {
+      cur = new_token(TK_CHAR, cur, p);
+      p += 4;
+      continue;
+    }
     if (strncmp("if", p, 2) == 0 && !is_alnum(p[2])) {
       cur = new_token(TK_IF, cur, p);
       p += 2;

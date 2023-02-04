@@ -195,9 +195,29 @@ void parse() {
   program();
 }
 
+TypeKind seek_reserved_type() {
+  TokenKind tk = CUR_TOKEN->kind;
+  switch (tk) {
+    case TK_INT:
+      return TY_INT;
+    case TK_CHAR:
+      return TY_CHAR;
+    default:
+      return TY_INVALID;
+  }
+}
+
+TypeKind consume_reserved_type() {
+  TypeKind tyk = seek_reserved_type();
+  if (tyk != TY_INVALID) {
+    CUR_TOKEN = CUR_TOKEN->next;
+  }
+  return tyk;
+}
+
 Token *skip_to_identifier() {
   Token *cur_token = CUR_TOKEN;
-  if (cur_token->kind != TK_INT) {
+  if (seek_reserved_type() == TY_INVALID) {
     return NULL;
   }
   cur_token = cur_token->next;
@@ -208,7 +228,7 @@ Token *skip_to_identifier() {
 }
 
 Token *toplevel_decl() {
-  if (!consume_tk(TK_INT)) {
+  if (!consume_reserved_type()) {
     return NULL;
   }
   Token *name = consume_ident();
@@ -219,7 +239,7 @@ Node *code[100];
 static void program() {
   GLOBAL_VARS = &EMPTY_GENV;
   int i = 0;
-  while (CUR_TOKEN->kind == TK_INT) {
+  while (seek_reserved_type()) {
     Token *name = skip_to_identifier();
     if (!match_reserved_token("(", name->next)) {
       // global variable
@@ -236,12 +256,12 @@ static void program() {
     expect("(");
     Node *node = def;
     while (!consume(")")) {
-      expect_tk(TK_INT);
+      TypeKind tyk = consume_reserved_type();
       Token *name = consume_ident();
       node->rhs = new_node(ND_INVALID, NULL, NULL);
       node = node->rhs;
       LVar *lvar = new_lvar(LOCAL_VARS, name->str, name->len, LOCAL_VARS->offset+8);
-      lvar->ty = ty_int();
+      lvar->ty = ty_reserved(tyk);
       LOCAL_VARS = lvar;
       node->lhs = new_node_ident(lvar);
       consume(",");
@@ -272,7 +292,7 @@ static Node *stmt() {
     }
     return nif;
   }
-  if (CUR_TOKEN->kind == TK_INT) {
+  if (seek_reserved_type()) {
     Node *decl = declaration();
     if (decl->ty->kind != TY_FN) {
       LVar *lvar = register_lvar(decl->tok, decl->ty);
@@ -327,8 +347,8 @@ static Node *equality() {
 }
 
 static Node *declaration_sub() {
-  consume_tk(TK_INT);
-  Node *node = declarator(ty_int());
+  TypeKind tyk = consume_reserved_type();
+  Node *node = declarator(ty_reserved(tyk));
   return node;
 }
 
@@ -355,13 +375,13 @@ static Node *direct_declarator(Type *spec_type) {
         Node params = { .lhs=NULL, .rhs=NULL,};
         Node *node = &params;
         while (!consume(")")) {
-          expect_tk(TK_INT);
+          TypeKind tyk = consume_reserved_type();
           Token *name = consume_ident();
           node->rhs = new_node(ND_INVALID, NULL, NULL);
           node = node->rhs;
           // don't set offsets at this time
           LVar *lvar = new_lvar(LOCAL_VARS, name->str, name->len, -10000);
-          lvar->ty = ty_int();
+          lvar->ty = ty_reserved(tyk);
           node->lhs = new_node_ident(lvar);
           consume(",");
         }

@@ -11,6 +11,12 @@ void view_type(Type *type) {
     return;
   }
   switch (type->kind) {
+  case TY_INVALID:
+    fprintf(stderr, "<invalid typ>");
+    break;
+  case TY_CHAR:
+    fprintf(stderr, "char");
+    break;
   case TY_INT:
     fprintf(stderr, "int");
     break;

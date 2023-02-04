@@ -72,5 +72,6 @@ assert 31 'int a; int main() { a = 31; return a; }'
 assert 43 'int bb; int g() { bb = 21; return bb; } int main() { int a; a = g(); return bb * 2 + 1; }'
 assert 10 'int a[10]; int main() { a[7] = 10; return a[7]; }'
 assert 19 'int *p; int main() { int a; p = &a; *p = 19; return a; }'
+assert  3 'int main() {char x[3]; x[0] = -1; x[1] = 2; int y; y = 4; return x[0] + y; }'
 
 echo OK

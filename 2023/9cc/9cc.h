@@ -2,6 +2,8 @@
 #define IXCC_H
 
 typedef enum {
+  TK_INVALID = 0,
+  TK_CHAR,
   TK_IF,
   TK_INT,
   TK_ELSE,
@@ -22,19 +24,24 @@ struct Token {
 };
 typedef struct Token Token;
 
+typedef enum {
+  TY_INVALID = 0,
+  TY_CHAR,
+  TY_INT,
+  TY_ARRAY,
+  TY_FN,
+  TY_PTR,
+} TypeKind;
+
 struct Type {
-  enum {
-    TY_INT,
-    TY_ARRAY,
-    TY_FN,
-    TY_PTR,
-  } kind;
+  TypeKind kind;
   struct Type *ptr_to;
   size_t array_size; // valid if kind == TY_ARRAY
   struct Node *params;
 };
 typedef struct Type Type;
 
+Type *ty_reserved(TypeKind tyk);
 Type *ty_int();
 Type *new_ty_array(size_t n, Type *to);
 Type *new_ty_fn(struct Node *params, Type *ret);

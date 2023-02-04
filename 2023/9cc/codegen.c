@@ -33,6 +33,10 @@ static int gensym() {
 
 int nbytes_type(Type *ty) {
   switch (ty->kind) {
+  case TY_INVALID:
+    error("invalid type");
+  case TY_CHAR:
+    return sizeof(char);
   case TY_INT:
     return sizeof(int);
   case TY_ARRAY:
@@ -45,8 +49,11 @@ int nbytes_type(Type *ty) {
 }
 
 int alignment_of(Type *ty) {
-  switch (ty->kind)
-  {
+  switch (ty->kind) {
+  case TY_INVALID:
+    error("invalid type");
+  case TY_CHAR:
+    return sizeof(char);
   case TY_INT:
     return sizeof(int);
   case TY_ARRAY:
