@@ -130,6 +130,13 @@ static LVar *register_lvar(Token *name, Type *type) {
   return lvar;
 }
 
+static GVar *register_gvar(Token *name, Type *type) {
+  GVar *gvar = new_gvar(GLOBAL_VARS, name->str, name->len);
+  gvar->ty = type;
+  GLOBAL_VARS = gvar;
+  return gvar;
+}
+
 static Node *new_node(NodeKind kind, Node *lhs, Node *rhs) {
   Node *node = calloc(1, sizeof(Node));
   node->kind = kind;
@@ -188,6 +195,18 @@ void parse() {
   program();
 }
 
+Token *skip_to_identifier() {
+  Token *cur_token = CUR_TOKEN;
+  if (cur_token->kind != TK_INT) {
+    return NULL;
+  }
+  cur_token = cur_token->next;
+  while (match_reserved_token("*", cur_token)) {
+    cur_token = cur_token->next;
+  }
+  return cur_token;
+}
+
 Token *toplevel_decl() {
   if (!consume_tk(TK_INT)) {
     return NULL;
@@ -200,18 +219,17 @@ Node *code[100];
 static void program() {
   GLOBAL_VARS = &EMPTY_GENV;
   int i = 0;
-  Token *name;
-  while ((name = toplevel_decl())) {
-    if (consume(";")) {
+  while (CUR_TOKEN->kind == TK_INT) {
+    Token *name = skip_to_identifier();
+    if (!match_reserved_token("(", name->next)) {
       // global variable
-      GVar *gvar = new_gvar(GLOBAL_VARS, name->str, name->len);
-      GLOBAL_VARS = gvar;
-      Node *decl = new_node(ND_DECL, NULL, NULL);
-      decl->tok = name;
+      Node *decl = declaration();
+      GVar *gvar = register_gvar(decl->tok, decl->ty);
       decl->gvar = gvar;
       code[i++] = decl;
       continue;
     }
+    name = toplevel_decl();
     LOCAL_VARS = &EMPTY_LENV;
     Node *def = new_node(ND_FNDEF, NULL, NULL);
     def->tok = name;
