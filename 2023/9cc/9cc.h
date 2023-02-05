@@ -106,6 +106,7 @@ typedef struct GVar GVar;
 
 extern Token *CUR_TOKEN;
 extern char *INPUT_HEAD;
+extern char *FILENAME;
 
 struct StrLit {
   struct StrLit *next;

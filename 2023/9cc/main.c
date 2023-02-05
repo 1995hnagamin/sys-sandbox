@@ -1,4 +1,5 @@
 #include <errno.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -37,7 +38,8 @@ int main(int argc, char **argv) {
   }
 
 
-  INPUT_HEAD = read_file(argv[1]);
+  FILENAME = argv[1];
+  INPUT_HEAD = read_file(FILENAME);
   CUR_TOKEN = tokenize(INPUT_HEAD);
   parse();
 
@@ -50,4 +52,48 @@ int main(int argc, char **argv) {
     gen(code[i]);
   }
   return 0;
+}
+
+void error(char *fmt, ...) {
+  va_list ap;
+  va_start(ap, fmt);
+
+  vfprintf(stderr, fmt, ap);
+  fprintf(stderr, "\n");
+  exit(1);
+}
+
+char *INPUT_HEAD;
+char *FILENAME;
+
+void error_at(char *loc, char *fmt, ...) {
+  va_list ap;
+  va_start(ap, fmt);
+  char *line = loc;
+  while (INPUT_HEAD < line && line[-1] != '\n') {
+    line--;
+  }
+
+  char *end = loc;
+  while (*end != '\n') {
+    end++;
+  }
+
+  int line_num = 1;
+  for (char *p = INPUT_HEAD; p < line; p++)
+    if (*p == '\n') {
+      line_num++;
+    }
+
+  int indent = fprintf(stderr, "%s:%d: ", FILENAME, line_num);
+  fprintf(stderr, "%.*s\n", (int)(end - line), line);
+
+  int pos = loc - line + indent;
+  for (int i = 0; i < pos; ++i) {
+    fprintf(stderr, " ");
+  }
+  fprintf(stderr, "^ ");
+  vfprintf(stderr, fmt, ap);
+  fprintf(stderr, "\n");
+  exit(1);
 }

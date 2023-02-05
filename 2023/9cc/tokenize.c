@@ -1,5 +1,4 @@
 #include <ctype.h>
-#include <stdarg.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -8,7 +7,6 @@
 
 
 Token *CUR_TOKEN;
-char *INPUT_HEAD;
 
 static Token *new_token(TokenKind kind, Token *cur, char *str) {
   Token *tok = calloc(1, sizeof(Token));
@@ -16,30 +14,6 @@ static Token *new_token(TokenKind kind, Token *cur, char *str) {
   tok->str = str;
   cur->next = tok;
   return tok;
-}
-
-void error(char *fmt, ...) {
-  va_list ap;
-  va_start(ap, fmt);
-
-  vfprintf(stderr, fmt, ap);
-  fprintf(stderr, "\n");
-  exit(1);
-}
-
-void error_at(char *loc, char *fmt, ...) {
-  va_list ap;
-  va_start(ap, fmt);
-
-  int pos = loc - INPUT_HEAD;
-  fprintf(stderr, "%s\n", INPUT_HEAD);
-  for (int i = 0; i < pos; ++i) {
-    fprintf(stderr, " ");
-  }
-  fprintf(stderr, "^ ");
-  vfprintf(stderr, fmt, ap);
-  fprintf(stderr, "\n");
-  exit(1);
 }
 
 static int is_alnum(char c) {
