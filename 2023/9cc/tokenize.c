@@ -80,9 +80,14 @@ Token *tokenize(char *p) {
       continue;
     }
     if (strncmp("sizeof", p, 6) == 0 && !is_alnum(p[6])) {
-        cur = new_token(TK_SIZEOF, cur, p);
-        p += 6;
-        continue;
+      cur = new_token(TK_SIZEOF, cur, p);
+      p += 6;
+      continue;
+    }
+    if (strncmp("while", p, 5) == 0 && !is_alnum(p[5])) {
+      cur = new_token(TK_WHILE, cur, p);
+      p += 5;
+      continue;
     }
     if (is_2char_symbol(p)) {
       cur = new_token(TK_RESERVED, cur, p);

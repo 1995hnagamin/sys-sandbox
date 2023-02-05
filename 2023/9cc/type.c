@@ -86,6 +86,10 @@ void set_type(Node *node) {
     set_type(node->rhs->lhs);
     set_type(node->rhs->rhs);
     break;
+  case ND_WHILE:
+    set_type(node->lhs);
+    set_type(node->rhs);
+    break;
   case ND_ASSIGN:
     set_type(node->lhs);
     set_type(node->rhs);

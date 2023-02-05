@@ -85,6 +85,19 @@ static void gen_if_stmt(Node *node) {
   return;
 }
 
+static void gen_while_stmt(Node *node) {
+  int begin_label = gensym();
+  int end_label = gensym();
+  printf(".L.begin.%d:\n", begin_label);
+  gen(node->lhs); // cond
+  printf("  pop rax\n");
+  printf("  cmp rax, 0\n");
+  printf("  je .L.end.%d\n", end_label);
+  gen(node->rhs); // body
+  printf("  jmp .L.begin.%d\n", begin_label);
+  printf(".L.end.%d:\n", end_label);
+}
+
 static char *REG_NAMES[6] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
 
 static void gen_fn_def(Node *def) {
@@ -160,6 +173,9 @@ void gen(Node *node) {
   case ND_IF:
     gen_if_stmt(node);
     return;
+  case ND_WHILE:
+    gen_while_stmt(node);
+    break;
   case ND_ASSIGN:
     printf("  # ND_ASSIGN\n");
     if (node->lhs->kind == ND_LVAR) {

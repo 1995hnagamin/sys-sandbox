@@ -321,6 +321,13 @@ static Node *stmt() {
     }
     return nif;
   }
+  if (consume_tk(TK_WHILE)) {
+    expect("(");
+    Node *cond = expr();
+    expect(")");
+    Node *body = stmt();
+    return new_node(ND_WHILE, cond, body);
+  }
   if (seek_reserved_type()) {
     Node *decl = declaration();
     if (decl->ty->kind != TY_FN) {

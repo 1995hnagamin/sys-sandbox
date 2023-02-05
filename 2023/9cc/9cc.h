@@ -8,6 +8,7 @@ typedef enum {
   TK_INT,
   TK_ELSE,
   TK_RETURN,
+  TK_WHILE,
   TK_SIZEOF,
   TK_RESERVED,
   TK_IDENT,
@@ -53,6 +54,7 @@ typedef enum {
   ND_DECL,
   ND_IF,
   ND_RETURN,
+  ND_WHILE,
   ND_ASSIGN, // assignments
   ND_FNCALL, // function call
   ND_ADD, // +

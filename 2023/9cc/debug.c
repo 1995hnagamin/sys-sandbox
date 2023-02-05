@@ -87,6 +87,14 @@ void view_node(Node *node) {
     fprintf(stderr, ")");
     return;
   }
+  if (node->kind == ND_WHILE) {
+    fprintf(stderr, "(while ");
+    view_node(node->lhs);
+    fprintf(stderr, " ");
+    view_node(node->rhs);
+    fprintf(stderr, ")");
+    return;
+  }
   if (node->kind == ND_FNCALL) {
     fprintf(stderr, "(call ");
     fprintf(stderr, "%.*s", node->tok->len, node->tok->str);

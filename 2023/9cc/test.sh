@@ -48,6 +48,7 @@ assert 15 test029.c
 assert 29 test030.c
 assert 31 test031.c
 assert  4 test032.c
+assert 55 ctrlflow/while01.c
 assert 10 test033.c
 assert 22 test034.c
 assert 10 test035.c
