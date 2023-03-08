@@ -16,6 +16,7 @@ assert() {
   fi
 }
 
+assert 92 8queen.c
 assert  0 test001.c
 assert 42 test002.c
 assert 21 test003.c
