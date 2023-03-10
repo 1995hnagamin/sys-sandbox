@@ -55,6 +55,7 @@ assert 10 fn/test035.c
 assert 91 fn/test036.c
 assert 21 fn/test037.c
 assert 13 fn/test038.c
+assert  0 fn/negarg01.c
 assert 15 ptr/test039.c
 assert  3 ptr/test040.c
 assert  4 sizeof/test041.c
