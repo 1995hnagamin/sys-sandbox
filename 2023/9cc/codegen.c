@@ -117,10 +117,18 @@ static void gen_fn_def(Node *def) {
   printf("  ret\n");
 }
 
+static void eval_arg_back(Node *arg) {
+  if (!arg) {
+    return;
+  }
+  eval_arg_back(arg->rhs);
+  gen(arg->lhs);
+}
+
 static void gen_fn_call(Node *call) {
   Node *arg = call->rhs;
+  eval_arg_back(arg);
   for (int i = 0; i < 6 && arg; ++i, arg = arg->rhs) {
-    gen(arg->lhs);
     printf("  pop %s\n", REG_NAMES[i]);
   }
   // https://stackoverflow.com/a/9600102
