@@ -1,3 +1,7 @@
 9cc
 tmp.s
 tmp
+*.log
+*.o
+*.s
+*.out
