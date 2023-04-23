@@ -16,6 +16,7 @@ assert() {
   fi
 }
 
+assert  1 arr/eleq1.c
 assert  0 test001.c
 assert 42 test002.c
 assert 21 arith/test003.c
@@ -31,6 +32,7 @@ assert  7 arith/test012.c
 assert 12 arith/test013.c
 assert  1 arith/test014.c
 assert  0 arith/test015.c
+assert  1 arith/cmp0.c
 assert  1 arith/test016.c
 assert  0 arith/test017.c
 assert  1 arith/test018.c
