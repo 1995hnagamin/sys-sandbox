@@ -1,13 +1,13 @@
 [package]
 name = "rsnc"
 version = "0.1.0"
-authors = ["NAGAMINE Hideaki <1995.hnagamin@gmail.com>"]
-edition = "2018"
+authors = ["Nagamine, Hideaki <1995.hnagamin@gmail.com>"]
+edition = "2021"
 description = "Rust Netcat"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-clap = "2.20.3"
+clap = { version = "4.3.21", features = ["derive"] }
 libc = "0.2.43"
 nix = "0.20.2"

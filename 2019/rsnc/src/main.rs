@@ -1,5 +1,5 @@
 extern crate clap;
-use clap::{App, Arg};
+use clap::Parser;
 use libc::{STDIN_FILENO, STDOUT_FILENO};
 use nix::sys::select;
 use nix::sys::socket::*;
@@ -11,24 +11,25 @@ mod sockbuf;
 const BACKLOG_SIZE: usize = 5;
 const SOCKBUF_SIZE: usize = 10;
 
-fn main() {
-    let app = App::new("rsnc").arg(
-        Arg::with_name("port")
-            .short("l")
-            .long("listen")
-            .takes_value(true),
-    );
-    let matches = app.get_matches();
-    if let Some(port) = matches.value_of("port") {
-        let portnum: u16 = port.parse().expect("not a number");
-        println!("{}", portnum);
-        run_server(portnum).unwrap();
-        return;
-    }
-    println!("{}", matches.usage());
+#[derive(Parser)]
+#[clap(
+    name = env!("CARGO_PKG_NAME"),
+    version = env!("CARGO_PKG_VERSION"),
+    author = env!("CARGO_PKG_AUTHORS"),
+    about = env!("CARGO_PKG_DESCRIPTION"),
+    arg_required_else_help = true,
+)]
+struct Cli {
+    #[clap(short = 'l', long = "listen", value_name = "port number")]
+    port: u16,
 }
 
-fn run_server(portnum: u16) -> Result<(), Box<Error>> {
+fn main() {
+    let cli = Cli::parse();
+    run_server(cli.port).unwrap();
+}
+
+fn run_server(portnum: u16) -> Result<(), Box<dyn Error>> {
     let listenfd = socket(
         AddressFamily::Inet,
         SockType::Stream,
@@ -49,7 +50,7 @@ fn run_server(portnum: u16) -> Result<(), Box<Error>> {
     Ok(())
 }
 
-fn handle_connection(connfd: RawFd) -> Result<(), Box<Error>> {
+fn handle_connection(connfd: RawFd) -> Result<(), Box<dyn Error>> {
     let fds = [STDIN_FILENO, STDOUT_FILENO, connfd];
     let maxfdp1 = 1 + fds.iter().max().unwrap();
     let mut sbs = [
